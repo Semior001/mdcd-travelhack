@@ -23,9 +23,11 @@ type ImageRest interface {
 	GetImage(w http.ResponseWriter, r *http.Request)
 	PostFilter(w http.ResponseWriter, r *http.Request)
 	CommitImage(w http.ResponseWriter, r *http.Request)
+	//GetBackgrounds(w http.ResponseWriter, r *http.Request)
 }
 
 func (i ImageController) SaveImage(w http.ResponseWriter, r *http.Request) {
+	imgType := r.URL.Query().Get("imgType")
 	usrToken, err := token.GetUserInfo(r)
 	if err != nil {
 		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrDBStoring)
@@ -38,14 +40,14 @@ func (i ImageController) SaveImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userId := userCredentials.ID
-	err = r.ParseMultipartForm(10240)
+	err = r.ParseMultipartForm(20480)
 	if err != nil {
 
 	}
 	fh := r.MultipartForm.File["image"]
 	reader, err := fh[0].Open()
 
-	imgId, err := i.ServiceImg.PutImage(userId, reader)
+	imgId, err := i.ServiceImg.PutImage(userId, imgType, reader)
 	if err != nil {
 		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrPutImage)
 		return

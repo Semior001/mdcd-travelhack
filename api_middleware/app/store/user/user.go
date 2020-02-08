@@ -26,7 +26,7 @@ const (
 // User describes basic user
 type User struct {
 	ID         uint64
-	Email      string
+	Email      string          `pg:",unique"`
 	Password   string          `json:"-"`
 	Privileges map[string]bool // in format "privilege: given"
 	CreatedAt  time.Time

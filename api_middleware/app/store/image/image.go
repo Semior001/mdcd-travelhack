@@ -15,6 +15,7 @@ import (
 
 type Image struct {
 	ID            uint64
+	ImgType       string
 	LocalFilename string
 	UserId        uint64
 	AddedBy       *user.User
@@ -72,7 +73,7 @@ func NewService(opts ServiceOpts) (*Service, error) {
 
 // PutImage stores image in the local path, given to the Service
 // and stores all metadata in the database via calling Store.putImage
-func (s *Service) PutImage(userId uint64, reader io.Reader) (imgId uint64, err error) {
+func (s *Service) PutImage(userId uint64, imgType string, reader io.Reader) (imgId uint64, err error) {
 	fileName := ksuid.New().String()
 	imFile := path.Join(s.LocalStoragePath, fileName)
 
@@ -94,6 +95,7 @@ func (s *Service) PutImage(userId uint64, reader io.Reader) (imgId uint64, err e
 	imgId, err = s.putImage(Image{
 		LocalFilename: fileName,
 		UserId:        userId,
+		ImgType:       imgType,
 	})
 	if err != nil {
 		return 0, errors.Wrapf(err, "can't put image metadata into db")
