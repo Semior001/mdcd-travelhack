@@ -29,22 +29,8 @@ type User struct {
 	Email      string
 	Password   string          `json:"-"`
 	Privileges map[string]bool // in format "privilege: given"
-	Sessions   []*Session
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
-}
-
-// Session describes a single user session
-type Session struct {
-	ID           uint64
-	User         *User
-	RefreshToken string
-	UserAgent    string
-	Fingerprint  string
-	IP           string
-	ExpiresIn    time.Duration
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
 }
 
 // Store defines an interface to put and load users from the database
@@ -56,9 +42,6 @@ type Store interface {
 	GetUserCredentials(email string) (user *User, err error)
 	getBasicUserInfo(id uint64) (user *User, err error)
 	DeleteUser(id uint64) (err error)
-	GetJWTToken(id uint64) (err error)
-	GetSessionsByUserID(id uint64) (sessions []Session, err error)
-	GetSession(id uint64) (session Session, err error)
 }
 
 // Service provides methods for operating, processing and storing users

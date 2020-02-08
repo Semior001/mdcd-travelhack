@@ -27,7 +27,7 @@ func NewPgStorage(options pg.Options, logger *log.Logger) (*PgStorage, error) {
 func (s *PgStorage) Migrate(force bool) error {
 	log.Printf("[DEBUG] started users storage migration")
 	if err := utils.CreateSchemas(s.db, force,
-		(*User)(nil), (*Session)(nil),
+		(*User)(nil),
 	); err != nil {
 		return errors.Wrapf(err, "there are some errors during the migration")
 	}
@@ -83,19 +83,4 @@ func (s *PgStorage) DeleteUser(id uint64) error {
 		return err
 	}
 	return nil
-}
-
-// GetJWTToken returns JWT token by user id
-func (s *PgStorage) GetJWTToken(id uint64) (err error) {
-	panic("implement me")
-}
-
-// GetSessionsByUserID returns slice Session object by given user id
-func (s *PgStorage) GetSessionsByUserID(id uint64) (sessions []Session, err error) {
-	panic("implement me")
-}
-
-// GetSession returns Session by its id
-func (s *PgStorage) GetSession(id uint64) (session Session, err error) {
-	panic("implement me")
 }
