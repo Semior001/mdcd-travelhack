@@ -78,7 +78,7 @@ func (s *Rest) makeAuth() *auth.Service {
 		AvatarStore:    avatar.NewNoOp(),
 		JWTQuery:       "jwt",
 		Logger:         logger.Std,
-		DisableXSRF:    true,
+		DisableXSRF:    false,
 		DisableIAT:     true,
 		SecretReader: token.SecretFunc(func(_ string) (string, error) {
 			// todo is thread-safe?
