@@ -3,6 +3,9 @@ import base64
 from flask import Blueprint, request
 from PIL import Image
 import io
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class ChromaKeyingService:
@@ -14,6 +17,15 @@ class ChromaKeyingService:
         :param bg_image_str: string which represents a background image
         :return: string which represents a processed image
         """
+        img = cv2.imread(src_image_str)
+        RED, GREEN, BLUE = (2, 1, 0)
+        reds = img[:, :, RED]
+        greens = img[:, :, GREEN]
+        blues = img[:, :, BLUE]
+        mask = (greens < 70) | (reds > greens) | (blues > greens)
+        result = np.where(mask, 255, 0)
+        # TODO background replacing
+        # cv2.imwrite("./test.jpg", result)
         raise NotImplementedError()
 
 
