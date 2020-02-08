@@ -35,7 +35,7 @@ func (s *PgStorage) Migrate(force bool) error {
 }
 
 // PutUser user into storage, if there is error, id will be 0
-func (s *PgStorage) putUser(user *User) (id uint64, err error) {
+func (s *PgStorage) putUser(user User) (id uint64, err error) {
 	if err := s.db.Insert(&user); err != nil {
 		return 0, err
 	}
@@ -43,7 +43,7 @@ func (s *PgStorage) putUser(user *User) (id uint64, err error) {
 }
 
 // UpdateUser user in the postgres storage
-func (s *PgStorage) UpdateUser(user *User) (err error) {
+func (s *PgStorage) UpdateUser(user User) (err error) {
 	if err := s.db.Update(&user); err != nil {
 		return err
 	}

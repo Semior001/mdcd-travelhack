@@ -44,7 +44,7 @@ func (s *RegisterAdmin) Execute(_ []string) error {
 		BcryptCost: s.BcryptCost,
 	}
 	log.Printf("[DEBUG] creating admin user %s", s.Email)
-	id, err := us.PutUser(&user.User{
+	id, err := us.PutUser(user.User{
 		Email:    s.Email,
 		Password: s.Password,
 		Privileges: map[string]bool{

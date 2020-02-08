@@ -36,8 +36,8 @@ type User struct {
 // Store defines an interface to put and load users from the database
 type Store interface {
 	Migrate(force bool) error
-	putUser(user *User) (id uint64, err error)
-	UpdateUser(user *User) (err error)
+	putUser(user User) (id uint64, err error)
+	UpdateUser(user User) (err error)
 	GetUser(id uint64) (user *User, err error)
 	GetUserCredentials(email string) (user *User, err error)
 	getBasicUserInfo(id uint64) (user *User, err error)
@@ -96,7 +96,7 @@ func (s *Service) CheckUserCredentials(email string, password string) (bool, err
 }
 
 // PutUser is a wrapper for db implementation, that hashes user's password
-func (s *Service) PutUser(user *User) (uint64, error) {
+func (s *Service) PutUser(user User) (uint64, error) {
 	// hashing password
 	bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), s.BcryptCost)
 	if err != nil {
