@@ -18,11 +18,13 @@ services:
             DBSOURCE: '${DB_URI}'
             DBMIGRATEFORCE: '${DBMIGRATEFORCE}'
             BCRYPTCOST: '${BCRYPTCOST}'
-            DB_USER: '${DB_USER}'
-            DB_PASSWORD: '${DB_PASSWORD}'
+            DBUSER: '${DB_USER}'
+            DBPASSWORD: '${DB_PASSWORD}'
             JWTSECRET: '${JWTSECRET}'
             STORAGEPATH: '${STORAGEPATH}'
             SERVICEURL: '${SERVICEURL}'
+            RU_EMAIL: '${RU_EMAIL}'
+            RU_PASSWORD: '${RU_PASSWORD}'
         ports:
             - 8080:8080
         command: ["/srv/scripts/wait-for-pgsql.sh", "db", "/entrypoint.sh", "serve"]
