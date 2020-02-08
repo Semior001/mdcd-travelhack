@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"github.com/Semior001/mdcd-travelhack/app/store/image"
 	"log"
 	"net/http"
 	"os"
@@ -34,7 +35,8 @@ type Rest struct {
 	ServiceURL string
 
 	// Data services
-	UserService user.Service
+	UserService  user.Service
+	ImageService image.Service
 
 	Auth struct {
 		TTL struct {
@@ -72,6 +74,8 @@ func (s *Rest) makeAuth() *auth.Service {
 		AvatarStore:    avatar.NewNoOp(),
 		JWTQuery:       "jwt",
 		Logger:         logger.Std,
+		DisableXSRF:    true,
+		DisableIAT:     true,
 		SecretReader: token.SecretFunc(func(_ string) (string, error) {
 			// todo is thread-safe?
 			return s.JWTSecret, nil
@@ -118,6 +122,25 @@ func (s *Rest) routes() chi.Router {
 	r.Use(middleware.RealIP)
 	r.Use(R.AppInfo(s.AppName, s.AppAuthor, s.Version), R.Ping)
 
+	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+		log.Printf("[DEBUG] registered route: %s %s\n", method, route)
+		return nil
+	}
+
+	m := s.authenticator.Middleware()
+
+	r.With(m.Auth).Group(func(r chi.Router) {
+		// protected routes
+		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte("it works"))
+		})
+
+	})
+
+	r.Group(func(r chi.Router) {
+		// public routes
+	})
+
 	authHandler, _ := s.authenticator.Handlers()
 
 	r.Group(func(r chi.Router) {
@@ -125,23 +148,9 @@ func (s *Rest) routes() chi.Router {
 		r.Mount("/auth", authHandler)
 	})
 
-	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
-		log.Printf("[DEBUG] registered route: %s %s\n", method, route)
-		return nil
-	}
-
 	if err := chi.Walk(r, walkFunc); err != nil {
 		log.Printf("[WARN] error occurred while printing routes: %s", err.Error())
 	}
-
-	r.Group(func(r chi.Router) {
-		// protected routes
-
-	})
-
-	r.Group(func(r chi.Router) {
-		// public routes
-	})
 
 	return r
 }

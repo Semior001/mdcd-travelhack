@@ -3,10 +3,11 @@ package cmd
 // Database struct describes cli flags and arguments that are necessary
 // to open connection with database
 type Database struct {
-	User     string `long:"dbuser" env:"DBUSER" required:"false" description:"database access user"`
-	Driver   string `long:"dbdriver" env:"DBDRIVER" required:"true" description:"database driver"`
-	Password string `long:"dbpassword" env:"DBPASSWORD" required:"false" description:"database access password"`
-	Source   string `long:"dbsource" env:"DBSOURCE" required:"true" description:"database source in format <dbname>@<host>:port"`
+	User             string `long:"dbuser" env:"DBUSER" required:"false" description:"database access user"`
+	Driver           string `long:"dbdriver" env:"DBDRIVER" required:"true" description:"database driver"`
+	Password         string `long:"dbpassword" env:"DBPASSWORD" required:"false" description:"database access password"`
+	Source           string `long:"dbsource" env:"DBSOURCE" required:"true" description:"database source in format <dbname>@<host>:port"`
+	LocalStoragePath string `long:"storagepath" env:"STORAGEPATH" required:"true" description:"local storage path for images"`
 	Hashing
 }
 
