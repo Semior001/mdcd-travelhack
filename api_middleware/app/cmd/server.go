@@ -18,7 +18,7 @@ type ServeCommand struct {
 }
 
 // Execute runs web server
-func (s *ServeCommand) Execute(args []string) error {
+func (s *ServeCommand) Execute(_ []string) error {
 	us, err := user.NewService(user.ServiceOpts{
 		Driver:      s.Database.Driver,
 		User:        s.Database.User,
