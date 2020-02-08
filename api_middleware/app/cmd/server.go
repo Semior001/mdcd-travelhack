@@ -9,8 +9,9 @@ import (
 // ServeCommand to run the server
 type ServeCommand struct {
 	Database
-	JWTSecret string `long:"jwtsecret" env:"JWTSECRET" required:"true" description:"jwt secret for hashing"`
-	MediaPath string `long:"mediapath" env:"MEDIAPATH" required:"true" description:"path to local media"`
+	JWTSecret  string `long:"jwtsecret" env:"JWTSECRET" required:"true" description:"jwt secret for hashing"`
+	MediaPath  string `long:"mediapath" env:"MEDIAPATH" required:"true" description:"path to local media"`
+	ServiceURL string `long:"serviceurl" env:"SERVICEURL" required:"true" description:"url to this web-server"`
 	CommonOptions
 }
 

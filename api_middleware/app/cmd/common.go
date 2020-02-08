@@ -27,7 +27,6 @@ type CommonOptions struct {
 	AppAuthor   string
 	Version     string
 	LoggerFlags int
-	ServiceURL  string
 }
 
 // SetCommonOptions options for the command
