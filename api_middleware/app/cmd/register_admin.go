@@ -22,7 +22,7 @@ type RegisterAdmin struct {
 }
 
 // Execute creates admin in the database with specified username and password
-func (s *RegisterAdmin) Execute(args []string) error {
+func (s *RegisterAdmin) Execute(_ []string) error {
 	var db user.Store
 	var err error
 
@@ -50,7 +50,6 @@ func (s *RegisterAdmin) Execute(args []string) error {
 		Privileges: map[string]bool{
 			user.PrivilegeAdmin: true,
 		},
-		Sessions: nil,
 	})
 	if err != nil {
 		return errors.Wrapf(err, "failed to create admin user %s", s.Email)
