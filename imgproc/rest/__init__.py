@@ -1,5 +1,13 @@
-from .chroma_key import chroma_key_controller
+from .chroma_key import ChromaKeyingService
+from .chroma_key import ChromaKeyController
+from .filtering import FilteringService
+from .filtering import FilterController
+from .filtering import FilterNotRecognized
 
 __all__ = [
-    'chroma_key_controller'
+    'ChromaKeyingService',
+    'ChromaKeyController',
+    'FilteringService',
+    'FilterController',
+    'FilterNotRecognized'
 ]

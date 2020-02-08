@@ -1,16 +1,36 @@
-from flask import Blueprint, request
+import base64
 
-chroma_key_controller = Blueprint('chromakeying', __name__)
-
-
-@chroma_key_controller.route('/test', methods=['GET', 'POST'])
-def test():
-    if request.method == 'POST':
-        return 'post method'
-    else:
-        return 'i guess get'
+from flask import Blueprint, request, make_response
 
 
-@chroma_key_controller.route('/test1', methods=['PUT'])
-def test1():
-    return 'PUT method'
+class ChromaKeyingService:
+    def replace(self, src_image_str, bg_image_str) -> str:
+        """
+        removes background from the image, which is provided as string,
+        <b>not filepath</b>
+        :param src_image_str: string which represents an image
+        :param bg_image_str: string which represents a background image
+        :return: string which represents a processed image
+        """
+        raise NotImplementedError()
+
+
+class ChromaKeyController:
+    def __init__(self, service):
+        self.blueprint = Blueprint('chromakeying', __name__)
+        self.service = service
+        self.routes()
+
+    def routes(self):
+        @self.blueprint.route('/replace-background', methods=['POST'])
+        def replace_background():
+            if 'image' not in request.files or 'background' not in request.files:
+                return {"error": "image or background or both are not provided"}, 400
+            imageString = request.files['image'].read()
+            backgroundString = request.files['background'].read()
+
+            response = make_response(self.service.replace(imageString, backgroundString))
+            response.headers.set('Content-Type', 'image/jpeg')
+            response.headers.set('Content-Disposition', 'attachment', filename='r.jpg')
+
+            return response
