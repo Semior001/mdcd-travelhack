@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"github.com/Semior001/mdcd-travelhack/app/store/image"
 	"log"
 	"net/http"
 	"os"
@@ -34,7 +35,8 @@ type Rest struct {
 	ServiceURL string
 
 	// Data services
-	UserService user.Service
+	UserService  user.Service
+	ImageService image.Service
 
 	Auth struct {
 		TTL struct {
