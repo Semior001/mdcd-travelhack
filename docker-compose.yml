@@ -1,12 +1,37 @@
 version: "3.3"
 
 services:
+    app:
+        build:
+            context: api_middleware
+            dockerfile: Dockerfile
+        image: semior/mdcd_api_middleware:latest
+        container_name: "mdcd_api_middleware"
+        hostname: "mdcd_api_middleware"
+        volumes:
+            - ./api_middleware:/srv
+        depends_on:
+            - "db"
+        environment:
+            DEBUG: 'true'
+            DBDRIVER: '${DB_DRIVER}'
+            DBSOURCE: '${DB_URI}'
+            DBMIGRATEFORCE: '${DBMIGRATEFORCE}'
+            BCRYPTCOST: '${BCRYPTCOST}'
+            DB_USER: '${DB_USER}'
+            DB_PASSWORD: '${DB_PASSWORD}'
+            JWTSECRET: '${JWTSECRET}'
+            STORAGEPATH: '${STORAGEPATH}'
+            SERVICEURL: '${SERVICEURL}'
+        ports:
+            - 8080:8080
+        command: ["/srv/scripts/wait-for-pgsql.sh", "db", "/entrypoint.sh", "serve"]
     db:
         image: postgres:latest
         environment:
-            POSTGRES_USER:     ${DB_USER}
-            POSTGRES_DB:       ${DB_NAME}
-            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_USER:     '${DB_USER}'
+            POSTGRES_DB:       '${DB_NAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD}'
         volumes:
             - ./db_data:/var/lib/postgresql/data
         ports:

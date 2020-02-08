@@ -73,7 +73,7 @@ func NewService(opts ServiceOpts) (*Service, error) {
 			User:     opts.User,
 			Password: opts.Password,
 			Database: strings.Split(opts.Source, "@")[0],
-			Addr:     strings.Split(opts.Source, "@")[1],
+			Addr:     strings.Split(opts.Source, "@")[1], // todo check that source satisfies pattern
 		}, log.New(os.Stdout, "pgstorage", opts.LoggerFlags))
 	}
 
