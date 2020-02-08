@@ -22,11 +22,16 @@ type UserRest interface {
 }
 
 func (u UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
-
+	users, err := u.ServiceUsr.GetUsers()
+	if err != nil {
+		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrUserNotFound)
+		return
+	}
+	render.JSON(w, r, users)
 }
 
 func (u UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
-	userId, err := strconv.ParseUint(chi.URLParam(r, "userId"), 10, 0)
+	userId, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 0)
 	if err != nil {
 		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrUserNotFound)
 		return
