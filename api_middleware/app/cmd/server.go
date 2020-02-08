@@ -32,7 +32,7 @@ func (s *ServeCommand) Execute(args []string) error {
 		AppName:     s.AppName,
 		AppAuthor:   s.AppAuthor,
 		JWTSecret:   s.JWTSecret,
-		ServiceURL:  s.Source,
+		ServiceURL:  s.ServiceURL,
 		UserService: *us,
 	}
 	r.Run(8080)
