@@ -77,6 +77,14 @@ func (s *PgStorage) getBasicUserInfo(id uint64) (*User, error) {
 	return &user, nil
 }
 
+func (s *PgStorage) GetUsers() ([]User, error) {
+	var users []User
+	if err := s.db.Model(&users).Select(&users); err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 // DeleteUser user by id from the postgres storage
 func (s *PgStorage) DeleteUser(id uint64) error {
 	if err := s.db.Delete(&User{ID: id}); err != nil {

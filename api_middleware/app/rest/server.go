@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"github.com/Semior001/mdcd-travelhack/app/rest/private"
 	"github.com/Semior001/mdcd-travelhack/app/store/image"
 	"log"
 	"net/http"
@@ -37,6 +38,9 @@ type Rest struct {
 	// Data services
 	UserService  user.Service
 	ImageService image.Service
+
+	UserController  private.UserController
+	ImageController private.ImageController
 
 	Auth struct {
 		TTL struct {
@@ -131,6 +135,13 @@ func (s *Rest) routes() chi.Router {
 
 	r.With(m.Auth).Group(func(r chi.Router) {
 		// protected routes
+		r.Route("/users", func(r chi.Router) {
+			r.Get("/{id}", s.UserController.GetUserById)
+			r.Get("/", s.UserController.GetUsers)
+			r.Put("/{id}", s.UserController.UpdateUser)
+			r.Delete("/{id}", s.UserController.DeleteUser)
+			r.Post("/", s.UserController.PostUser)
+		})
 		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write([]byte("it works"))
 		})
@@ -139,6 +150,7 @@ func (s *Rest) routes() chi.Router {
 
 	r.Group(func(r chi.Router) {
 		// public routes
+
 	})
 
 	authHandler, _ := s.authenticator.Handlers()

@@ -1,4 +1,4 @@
-package rest
+package http_errors
 
 import (
 	"bytes"
@@ -11,8 +11,11 @@ import (
 
 // All error codes for UI mapping and translation
 const (
-	ErrInternal   = 0 // any internal error
-	ErrDecodeJSON = 1 // failed to unmarshal json
+	ErrInternal     = 0 // any internal error
+	ErrDecodeJSON   = 1 // failed to unmarshal json
+	ErrDBStoring    = 2 // failed to store in db
+	ErrUserNotFound = 3
+	ErrPutImage     = 4
 )
 
 const errorHTML = `<!DOCTYPE html>
@@ -32,6 +35,7 @@ const errorHTML = `<!DOCTYPE html>
 // errData describes parameters of any error
 type errData struct {
 	error   string
+	errCode int
 	details string
 }
 
@@ -56,6 +60,7 @@ func SendJSONError(w http.ResponseWriter, r *http.Request, httpStatusCode int, e
 	render.Status(r, httpStatusCode)
 	render.JSON(w, r, errData{
 		error:   err.Error(),
+		errCode: errCode,
 		details: details,
 	})
 }

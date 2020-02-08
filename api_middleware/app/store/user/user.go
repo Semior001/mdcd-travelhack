@@ -39,6 +39,7 @@ type Store interface {
 	putUser(user User) (id uint64, err error)
 	UpdateUser(user User) (err error)
 	GetUser(id uint64) (user *User, err error)
+	GetUsers() (users []User, err error)
 	GetUserCredentials(email string) (user *User, err error)
 	getBasicUserInfo(id uint64) (user *User, err error)
 	DeleteUser(id uint64) (err error)

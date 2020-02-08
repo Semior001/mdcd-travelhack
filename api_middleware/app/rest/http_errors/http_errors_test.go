@@ -1,4 +1,4 @@
-package rest
+package http_errors
 
 import (
 	"encoding/json"
