@@ -118,13 +118,6 @@ func (s *Rest) routes() chi.Router {
 	r.Use(middleware.RealIP)
 	r.Use(R.AppInfo(s.AppName, s.AppAuthor, s.Version), R.Ping)
 
-	authHandler, _ := s.authenticator.Handlers()
-
-	r.Group(func(r chi.Router) {
-		r.Use(middleware.Timeout(5 * time.Second))
-		r.Mount("/auth", authHandler)
-	})
-
 	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
 		log.Printf("[DEBUG] registered route: %s %s\n", method, route)
 		return nil
@@ -134,13 +127,22 @@ func (s *Rest) routes() chi.Router {
 		log.Printf("[WARN] error occurred while printing routes: %s", err.Error())
 	}
 
-	r.Group(func(r chi.Router) {
+	m := s.authenticator.Middleware()
+
+	r.With(m.Auth).Group(func(r chi.Router) {
 		// protected routes
 
 	})
 
 	r.Group(func(r chi.Router) {
 		// public routes
+	})
+
+	authHandler, _ := s.authenticator.Handlers()
+
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.Timeout(5 * time.Second))
+		r.Mount("/auth", authHandler)
 	})
 
 	return r
