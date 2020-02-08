@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 from flask import Flask
 
-from imgproc import rest
+from imgproc import rest, processing
 
 APP_NAME = "imgproc"
 APP_AUTHOR = "midnight coders"
@@ -61,7 +61,12 @@ def main():
 
     # flask initialization
     app = Flask(__name__)
-    app.register_blueprint(rest.chroma_key_controller)
+
+    chroma_key_ctrl = rest.ChromaKeyController(processing.ChromaKeyServiceImpl())
+    filtering_ctrl = rest.FilterController(processing.FilteringServiceImpl())
+
+    app.register_blueprint(chroma_key_ctrl.blueprint)
+    app.register_blueprint(filtering_ctrl.blueprint)
 
     show_all_routes(app)
 

@@ -1,56 +1,44 @@
-import numpy as np
 import cv2
+from imgproc import rest
+
+import numpy as np
 
 
-def main():
-    cap = cv2.VideoCapture(0)  # use external cam
+class ChromaKeyServiceImpl(rest.ChromaKeyingService):
+    def replace(self, src_image_str, bg_image_str) -> bytes:
+        bg = cv2.imdecode(np.frombuffer(bg_image_str, np.uint8), cv2.IMREAD_COLOR)
+        img = cv2.imdecode(np.frombuffer(src_image_str, np.uint8), cv2.IMREAD_COLOR)
 
-    cv2.namedWindow("Tracking", cv2.WINDOW_FULLSCREEN)
-    # get the background and resize it.
-    img_back = cv2.imread('/Users/semior/go/src/github.com/Semior001/opencv_go/bg.jpg')
-    background_color = np.uint8([[[0, 255, 0]]])
-    hls_background_color = cv2.cvtColor(background_color, cv2.COLOR_BGR2HLS)
-    hls_background_color = hls_background_color[0][0]
+        RED, GREEN, BLUE = (2, 1, 0)
 
-    def nothing(x):
-        pass
+        reds = img[:, :, RED]
+        greens = img[:, :, GREEN]
+        blues = img[:, :, BLUE]
 
-    LOWER = 100
-    UPPER = 120
-    cv2.createTrackbar("Upper hue", "Tracking", UPPER, 255, nothing)
-    cv2.createTrackbar("Lower hue", "Tracking", LOWER, 255, nothing)
+        # z = np.zeros(shape=img.shape, dtype=in
 
-    while True:
-        _, frame = cap.read()
-        cols, rows = frame.shape[:2]
-        background = img_back[0:cols, 0:rows]
-        frame = cv2.flip(frame, 1, frame)
+        mask = (greens < 70) | (reds > greens) | (blues > greens)
+        mask = mask.astype("uint8") * 255
 
-        hls_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
+        # print(mask)
 
-        hue = hls_image[:, :, 0]
+        mask_inv = cv2.bitwise_not(mask)
 
-        binary_hue = cv2.inRange(hue, LOWER, UPPER)
+        # cv2.imshow("Mask", mask)
+        # cv2.imshow("Mask inv", mask_inv)
 
-        mask = np.zeros(hls_image.shape, dtype=np.uint8)
+        # converting mask 2d to 3d
+        result = cv2.bitwise_and(img, img, mask=mask)
 
-        mask[:, :, 0] = binary_hue
-        mask[:, :, 1] = binary_hue
-        mask[:, :, 2] = binary_hue
+        bg = cv2.resize(bg, (1280, 720))
+        bg = cv2.bitwise_and(bg, bg, mask=mask_inv)
 
-        blured = cv2.GaussianBlur(mask, (11, 11), 0)
-        blured_inverted = cv2.bitwise_not(blured)
-        bg_key = cv2.bitwise_and(background, blured)
-        fg_key = cv2.bitwise_and(frame, blured_inverted)
-        keyed = cv2.add(bg_key, fg_key)
+        res = cv2.add(result, bg)
 
-        LOWER = cv2.getTrackbarPos("Lower hue", "Tracking")
-        UPPER = cv2.getTrackbarPos("Upper hue", "Tracking")
+        is_success, im_buf_arr = cv2.imencode(".jpg", res)
+        return im_buf_arr.tobytes()
 
-        cv2.imshow('frame', keyed)
-        k = cv2.waitKey(33)
-        if k == 27:  # ESC
-            break
-
-if __name__ == "__main__":
-    main()
+        # cv2.imshow("Result", res)
+        # # cv2.imshow("Bg", bg)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
