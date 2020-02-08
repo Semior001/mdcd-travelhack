@@ -20,7 +20,7 @@ type Options struct {
 	Dbg bool `long:"dbg" env:"DEBUG" description:"debug mode"`
 }
 
-const appName = "gotemplate"
+const appName = "mdcd_api_middleware"
 const appAuthor = "semior"
 const version = "unknown"
 
