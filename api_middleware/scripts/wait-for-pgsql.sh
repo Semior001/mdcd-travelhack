@@ -10,7 +10,7 @@ cmd="$@"
 
 echo "Trying to authorize with $DB_USER : $DB_PASSWORD to $host ..."
 
-until PGPASSWORD=$DB_PASSWORD psql -h "$host" -U "$DB_USER" -c '\q'; do
+until PGPASSWORD=$DBPASSWORD psql -h "$host" -U "$DBUSER" -c '\q'; do
   >&2 echo "Postgres is unavailable - sleeping"
   sleep 1
 done
