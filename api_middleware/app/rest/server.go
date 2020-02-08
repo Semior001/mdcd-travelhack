@@ -74,6 +74,8 @@ func (s *Rest) makeAuth() *auth.Service {
 		AvatarStore:    avatar.NewNoOp(),
 		JWTQuery:       "jwt",
 		Logger:         logger.Std,
+		DisableXSRF:    true,
+		DisableIAT:     true,
 		SecretReader: token.SecretFunc(func(_ string) (string, error) {
 			// todo is thread-safe?
 			return s.JWTSecret, nil
@@ -125,14 +127,13 @@ func (s *Rest) routes() chi.Router {
 		return nil
 	}
 
-	if err := chi.Walk(r, walkFunc); err != nil {
-		log.Printf("[WARN] error occurred while printing routes: %s", err.Error())
-	}
-
 	m := s.authenticator.Middleware()
 
 	r.With(m.Auth).Group(func(r chi.Router) {
 		// protected routes
+		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte("it works"))
+		})
 
 	})
 
@@ -146,6 +147,10 @@ func (s *Rest) routes() chi.Router {
 		r.Use(middleware.Timeout(5 * time.Second))
 		r.Mount("/auth", authHandler)
 	})
+
+	if err := chi.Walk(r, walkFunc); err != nil {
+		log.Printf("[WARN] error occurred while printing routes: %s", err.Error())
+	}
 
 	return r
 }
