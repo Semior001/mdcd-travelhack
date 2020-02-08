@@ -29,36 +29,19 @@ type User struct {
 	Email      string
 	Password   string          `json:"-"`
 	Privileges map[string]bool // in format "privilege: given"
-	Sessions   []*Session
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
-}
-
-// Session describes a single user session
-type Session struct {
-	ID           uint64
-	User         *User
-	RefreshToken string
-	UserAgent    string
-	Fingerprint  string
-	IP           string
-	ExpiresIn    time.Duration
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
 }
 
 // Store defines an interface to put and load users from the database
 type Store interface {
 	Migrate(force bool) error
-	putUser(user *User) (id uint64, err error)
-	UpdateUser(user *User) (err error)
+	putUser(user User) (id uint64, err error)
+	UpdateUser(user User) (err error)
 	GetUser(id uint64) (user *User, err error)
 	GetUserCredentials(email string) (user *User, err error)
 	getBasicUserInfo(id uint64) (user *User, err error)
 	DeleteUser(id uint64) (err error)
-	GetJWTToken(id uint64) (err error)
-	GetSessionsByUserID(id uint64) (sessions []Session, err error)
-	GetSession(id uint64) (session Session, err error)
 }
 
 // Service provides methods for operating, processing and storing users
@@ -113,7 +96,7 @@ func (s *Service) CheckUserCredentials(email string, password string) (bool, err
 }
 
 // PutUser is a wrapper for db implementation, that hashes user's password
-func (s *Service) PutUser(user *User) (uint64, error) {
+func (s *Service) PutUser(user User) (uint64, error) {
 	// hashing password
 	bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), s.BcryptCost)
 	if err != nil {
