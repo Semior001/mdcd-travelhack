@@ -17,7 +17,7 @@ import (
 
 	"github.com/go-pkgz/auth/provider"
 
-	"github.com/Semior001/gotemplate/app/store/user"
+	"github.com/Semior001/mdcd-travelhack/app/store/user"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"

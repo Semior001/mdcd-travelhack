@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/Semior001/gotemplate/app/utils"
+	"github.com/Semior001/mdcd-travelhack/app/utils"
 	"github.com/go-pg/pg/v9"
 )
 

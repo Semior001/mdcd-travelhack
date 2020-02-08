@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Semior001/gotemplate/app/cmd"
+	"github.com/Semior001/mdcd-travelhack/app/cmd"
 
 	"github.com/hashicorp/logutils"
 	"github.com/jessevdk/go-flags"

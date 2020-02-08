@@ -17,3 +17,17 @@ template for future projects or projects that will be developed during hackathon
     │       └── user.go            - user and his structs, interface for working directly with 
     │                                 database and service methodss
     └── main.go                    - application entrypoint, processes commands and cli-arguments
+
+# services:
+* api_middleware - golang-written web services that provides api to frontend
+* imgproc 
+
+# running application
+```bash
+docker-compose up --build [-d]
+```
+
+# restarting application
+```bash
+docker-compose restart [service name]
+```

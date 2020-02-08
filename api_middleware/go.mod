@@ -1,4 +1,4 @@
-module github.com/Semior001/gotemplate
+module github.com/Semior001/mdcd-travelhack
 
 go 1.13
 

@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/Semior001/gotemplate/app/rest"
-	"github.com/Semior001/gotemplate/app/store/user"
+	"github.com/Semior001/mdcd-travelhack/app/rest"
+	"github.com/Semior001/mdcd-travelhack/app/store/user"
 	"github.com/pkg/errors"
 )
 
