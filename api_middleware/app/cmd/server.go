@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/Semior001/mdcd-travelhack/app/rest"
+	"github.com/Semior001/mdcd-travelhack/app/rest/private"
 	"github.com/Semior001/mdcd-travelhack/app/store/image"
 	"github.com/Semior001/mdcd-travelhack/app/store/user"
 	"github.com/pkg/errors"
@@ -46,13 +47,18 @@ func (s *ServeCommand) Execute(_ []string) error {
 	}
 
 	r := rest.Rest{
-		Version:      s.Version,
-		AppName:      s.AppName,
-		AppAuthor:    s.AppAuthor,
-		JWTSecret:    s.JWTSecret,
-		ServiceURL:   s.ServiceURL,
-		UserService:  *us,
-		ImageService: *im,
+		Version:        s.Version,
+		AppName:        s.AppName,
+		AppAuthor:      s.AppAuthor,
+		JWTSecret:      s.JWTSecret,
+		ServiceURL:     s.ServiceURL,
+		UserService:    *us,
+		ImageService:   *im,
+		UserController: private.UserController{ServiceUsr: *us},
+		ImageController: private.ImageController{
+			ServiceImg: *im,
+			ServiceUsr: *us,
+		},
 		Auth: struct {
 			TTL struct {
 				JWT    time.Duration
