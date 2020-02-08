@@ -4,8 +4,6 @@ from flask import Blueprint, request
 from PIL import Image
 import io
 
-chroma_key_controller = Blueprint('chromakeying', __name__)
-
 
 class ChromaKeyingService:
     def replace(self, src_image_str, bg_image_str) -> str:
@@ -19,16 +17,15 @@ class ChromaKeyingService:
         raise NotImplementedError()
 
 
-@chroma_key_controller.route('/test', methods=['GET', 'POST'])
-def test():
-    g = request.files.get('imagefile')
-    imageString = base64.b64decode(request.form['img'])
-    if request.method == 'POST':
-        return 'post method'
-    else:
-        return 'i guess get'
+class ChromaKeyController:
+    def __init__(self, service):
+        self.blueprint = Blueprint('chromakeying', __name__)
+        self.service = service
 
-
-@chroma_key_controller.route('/test1', methods=['PUT'])
-def test1():
-    return 'PUT method'
+    def routes(self):
+        @self.blueprint.route('/replace-background', methods=['GET', 'POST'])
+        def replace_background():
+            imageString = base64.b64decode(request.form['image'])
+            backgroundString = base64.b64decode(request.form['background'])
+            if request.method == 'POST':
+                return self.service.replace(imageString, backgroundString)
