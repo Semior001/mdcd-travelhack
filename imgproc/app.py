@@ -4,7 +4,7 @@ import os
 import threading
 from argparse import ArgumentParser
 
-from flask import Flask, url_for
+from flask import Flask
 
 from imgproc import rest
 
