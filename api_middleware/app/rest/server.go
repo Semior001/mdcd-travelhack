@@ -138,6 +138,9 @@ func (s *Rest) routes() chi.Router {
 		r.Route("/users", func(r chi.Router) {
 			r.Get("/{id}", s.UserController.GetUserById)
 			r.Get("/", s.UserController.GetUsers)
+			r.Put("/{id}", s.UserController.UpdateUser)
+			r.Delete("/{id}", s.UserController.DeleteUser)
+			r.Post("/", s.UserController.PostUser)
 		})
 		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write([]byte("it works"))

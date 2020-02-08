@@ -51,7 +51,7 @@ func (i ImageController) SaveImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.JSON(w, r, R.JSON{
-		"id": imgId,
+		"ID": imgId,
 	})
 }
 
