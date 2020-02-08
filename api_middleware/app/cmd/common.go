@@ -7,8 +7,10 @@ type Database struct {
 	Driver   string `long:"dbdriver" env:"DBDRIVER" required:"true" description:"database driver"`
 	Password string `long:"dbpassword" env:"DBPASSWORD" required:"false" description:"database access password"`
 	Source   string `long:"dbsource" env:"DBSOURCE" required:"true" description:"database source in format <dbname>@<host>:port"`
+	Hashing
 }
 
+// Hashing struct defines optional parameters for hashing
 type Hashing struct {
 	BcryptCost int `long:"bcryptcost" env:"BCRYPTCOST" required:"true" description:"number of hashing applied to string"`
 }

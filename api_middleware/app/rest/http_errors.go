@@ -45,14 +45,14 @@ func SendHTMLErrorPage(w http.ResponseWriter, r *http.Request, httpStatusCode in
 	}); err != nil {
 		panic(err)
 	}
-	log.Printf("[WARN] error occured, while processing request: %s, internal error code: %d", err.Error(), errCode)
+	log.Printf("[WARN] error occurred, while processing request: %s, internal error code: %d", err.Error(), errCode)
 	render.Status(r, httpStatusCode)
 	render.HTML(w, r, msg.String())
 }
 
 // SendJSONError returns a json representation of an occurred error
 func SendJSONError(w http.ResponseWriter, r *http.Request, httpStatusCode int, err error, details string, errCode int) {
-	log.Printf("[WARN] error occured, while processing request: %s, internal error code: %d", err.Error(), errCode)
+	log.Printf("[WARN] error occurred, while processing request: %s, internal error code: %d", err.Error(), errCode)
 	render.Status(r, httpStatusCode)
 	render.JSON(w, r, errData{
 		error:   err.Error(),

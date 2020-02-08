@@ -11,7 +11,6 @@ type ServeCommand struct {
 	Database
 	JWTSecret string `long:"jwtsecret" env:"JWTSECRET" required:"true" description:"jwt secret for hashing"`
 
-	Hashing
 	CommonOptions
 }
 

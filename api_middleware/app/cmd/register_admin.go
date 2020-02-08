@@ -19,7 +19,6 @@ type RegisterAdmin struct {
 	Password string `long:"password" env:"RU_PASSWORD" required:"true" description:"password of registering user"`
 
 	CommonOptions
-	Hashing
 }
 
 // Execute creates admin in the database with specified username and password
