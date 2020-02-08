@@ -1,7 +1,5 @@
-from imgproc.rest.server import RestParams, Rest, ProcessingImageService
+from .chroma_key import chroma_key_controller
 
 __all__ = [
-    'RestParams',
-    'Rest',
-    'ProcessingImageService'
+    'chroma_key_controller'
 ]
