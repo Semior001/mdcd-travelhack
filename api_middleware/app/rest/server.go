@@ -143,7 +143,7 @@ func (s *Rest) routes() chi.Router {
 			r.Post("/", s.UserController.PostUser)
 		})
 		r.Post("/add_image", s.ImageController.SaveImage)
-		//r.Get("/backgrounds", s.ImageController.GetBackgrounds)
+		r.Get("/backgrounds", s.ImageController.GetBackgrounds)
 
 		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write([]byte("it works"))
@@ -153,7 +153,7 @@ func (s *Rest) routes() chi.Router {
 
 	r.Group(func(r chi.Router) {
 		// public routes
-
+		r.Get("/check_barcode", s.ImageController.CheckBarcode)
 	})
 
 	authHandler, _ := s.authenticator.Handlers()

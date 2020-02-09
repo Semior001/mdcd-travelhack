@@ -3,6 +3,7 @@ package image
 import (
 	"github.com/Semior001/mdcd-travelhack/app/store/user"
 	"github.com/go-pg/pg/v9"
+	R "github.com/go-pkgz/rest"
 	"github.com/pkg/errors"
 	"github.com/segmentio/ksuid"
 	"io"
@@ -15,6 +16,7 @@ import (
 
 type Image struct {
 	ID            uint64
+	BarCode       string
 	ImgType       string
 	LocalFilename string
 	UserId        uint64
@@ -27,6 +29,8 @@ type Store interface {
 	Migrate(force bool) error
 	putImage(imgMetaData Image) (imgId uint64, err error)
 	getImage(id uint64) (imgMetaData Image, err error)
+	GetBackgrounds() (ids []uint64, err error)
+	CheckBarcode(barcode string) (json R.JSON, err error)
 }
 
 type Service struct {

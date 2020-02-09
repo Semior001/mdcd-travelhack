@@ -23,7 +23,28 @@ type ImageRest interface {
 	GetImage(w http.ResponseWriter, r *http.Request)
 	PostFilter(w http.ResponseWriter, r *http.Request)
 	CommitImage(w http.ResponseWriter, r *http.Request)
-	//GetBackgrounds(w http.ResponseWriter, r *http.Request)
+	GetBackgrounds(w http.ResponseWriter, r *http.Request)
+
+	CheckBarcode(w http.ResponseWriter, r *http.Request)
+}
+
+func (i ImageController) CheckBarcode(w http.ResponseWriter, r *http.Request) {
+	sctoken := r.URL.Query().Get("sctoken")
+	if sctoken != "admin_access" {
+		render.JSON(w, r, R.JSON{"ok": false})
+		return
+	}
+	barcode := r.URL.Query().Get("barcode")
+
+	json, err := i.ServiceImg.CheckBarcode(barcode)
+	if err != nil {
+		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrInternal)
+		return
+	}
+
+	// todo implement call to printsrv
+
+	render.JSON(w, r, json)
 }
 
 func (i ImageController) SaveImage(w http.ResponseWriter, r *http.Request) {
@@ -55,6 +76,15 @@ func (i ImageController) SaveImage(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, R.JSON{
 		"ID": imgId,
 	})
+}
+
+func (i ImageController) GetBackgrounds(w http.ResponseWriter, r *http.Request) {
+	ids, err := i.ServiceImg.GetBackgrounds()
+	if err != nil {
+		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrInternal)
+		return
+	}
+	render.JSON(w, r, ids)
 }
 
 func (i ImageController) GetImage(w http.ResponseWriter, r *http.Request) {
