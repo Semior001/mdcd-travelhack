@@ -1,7 +1,7 @@
 import os
 import platform
 
-from printsrv.rest import PrintingService
+from rest import PrintingService
 
 
 class PrintingServiceImpl(PrintingService):

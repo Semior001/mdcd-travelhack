@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 from flask import Flask
 
-from printsrv import rest, service
+import rest, service
 
 APP_NAME = "printingsrv"
 APP_AUTHOR = "midnight coders"

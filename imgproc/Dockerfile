@@ -1,10 +1,10 @@
 FROM jjanzic/docker-python3-opencv:latest
 
-COPY . /srv
+COPY . /srv/imgproc
 
-RUN pip3 install -r /srv/requirements.txt
+RUN pip3 install -r /srv/imgproc/requirements.txt
 
-WORKDIR /srv
+WORKDIR /srv/imgproc
 
 EXPOSE 8083
-ENTRYPOINT ["python3 app.py"]
+ENTRYPOINT ["python3", "/srv/imgproc/app.py"]

@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 from flask import Flask
 
-from imgproc import rest, processing
+import rest, processing
 
 APP_NAME = "imgproc"
 APP_AUTHOR = "midnight coders"

@@ -4,7 +4,7 @@ import pilgram.css
 import pilgram
 from PIL import Image
 
-from imgproc import rest
+import rest
 
 
 class FilteringServiceImpl(rest.FilteringService):
