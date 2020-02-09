@@ -25,8 +25,8 @@ services:
             SERVICEURL: '${SERVICEURL}'
             RU_EMAIL: '${RU_EMAIL}'
             RU_PASSWORD: '${RU_PASSWORD}'
-            IMGPROC_SERVICE_URL: 'http://imgproc:8082/'
-            PRINTSRV_SERVICE_URL: 'http://printsrv:8083/'
+            IMGPROCURL: 'http://imgproc:8082/'
+            PRINTSRVURL: 'http://printsrv:8083/'
         ports:
             - 8080:8080
         command: ["/srv/scripts/wait-for-pgsql.sh", "db", "/entrypoint.sh", "serve"]
