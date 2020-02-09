@@ -71,7 +71,8 @@ func NewService(opts ServiceOpts) (*Service, error) {
 		return nil, err
 	}
 	return &Service{
-		Store: db,
+		Store:            db,
+		LocalStoragePath: opts.LocalStoragePath,
 	}, nil
 }
 
