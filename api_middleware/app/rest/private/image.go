@@ -7,7 +7,11 @@ import (
 	"github.com/go-chi/render"
 	"github.com/go-pkgz/auth/token"
 	R "github.com/go-pkgz/rest"
+	"io"
+	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 // ImageController defines some parameters that are necessary to
@@ -24,6 +28,7 @@ type ImageRest interface {
 	PostFilter(w http.ResponseWriter, r *http.Request)
 	CommitImage(w http.ResponseWriter, r *http.Request)
 	GetBackgrounds(w http.ResponseWriter, r *http.Request)
+	GetBackground(w http.ResponseWriter, r *http.Request)
 
 	CheckBarcode(w http.ResponseWriter, r *http.Request)
 }
@@ -85,6 +90,48 @@ func (i ImageController) GetBackgrounds(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	render.JSON(w, r, ids)
+}
+
+func (i ImageController) GetBackground(w http.ResponseWriter, r *http.Request) {
+	imgId, err := strconv.ParseUint(r.URL.Query().Get("id"), 10, 0)
+	if err != nil {
+		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrInternal)
+		return
+	}
+
+	_, fh, err := i.ServiceImg.GetImage(imgId)
+	if err != nil {
+		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrInternal)
+		return
+	}
+
+	imgContentType := func(img string) string {
+		img = strings.ToLower(img)
+		switch {
+		case strings.HasSuffix(img, ".png"):
+			return "image/png"
+		case strings.HasSuffix(img, ".jpg") || strings.HasSuffix(img, ".jpeg"):
+			return "image/jpeg"
+		case strings.HasSuffix(img, ".gif"):
+			return "image/gif"
+		}
+		return "image/*"
+
+	}
+
+	defer func() {
+		if err := fh.Close(); err != nil {
+			log.Printf("[DEBUG] can't close image file")
+		}
+	}()
+
+	w.Header().Set("Content-Type", imgContentType(".jpg"))
+	//w.Header().Set("Content-Length", strconv.Itoa(int()))
+	w.WriteHeader(http.StatusOK)
+	if _, err = io.Copy(w, fh); err != nil {
+		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrInternal)
+		return
+	}
 }
 
 func (i ImageController) GetImage(w http.ResponseWriter, r *http.Request) {
