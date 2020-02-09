@@ -20,6 +20,8 @@ type ServeCommand struct {
 	Email    string `long:"email" env:"RU_EMAIL" required:"true" description:"email of registering user"`
 	Password string `long:"password" env:"RU_PASSWORD" required:"true" description:"password of registering user"`
 
+	ImageProcServiceURL string `long:"imgprocurl" env:"IMGPROCURL" required:"true" description:"image proc service url"`
+
 	CommonOptions
 }
 
@@ -93,7 +95,7 @@ func (s *ServeCommand) Execute(_ []string) error {
 		ImageController: private.ImageController{
 			ServiceImg:          *im,
 			ServiceUsr:          *us,
-			ImageProcServiceURL: "http://imgproc:8082/",
+			ImageProcServiceURL: s.ImageProcServiceURL,
 		},
 		Auth: struct {
 			TTL struct {

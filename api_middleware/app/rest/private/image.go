@@ -167,10 +167,10 @@ func (i ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
 		bg, err = bgFiles[0].Open()
 		if err != nil {
 			log.Printf("[WARN] failed to open bgfile %+v", err)
+			render.Status(r, 500)
 			render.JSON(w, r, R.JSON{
 				"error": "failed to open bgfile",
 			})
-			render.Status(r, 500)
 			return
 		}
 	}
@@ -178,10 +178,10 @@ func (i ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
 	bgId, err := strconv.Atoi(bgIdStr)
 	if err != nil {
 		log.Printf("[WARN] failed to atoi %+v", err)
+		render.Status(r, 500)
 		render.JSON(w, r, R.JSON{
 			"error": "failed to atoi",
 		})
-		render.Status(r, 500)
 		return
 	}
 
@@ -189,30 +189,21 @@ func (i ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
 		_, bg, err = i.ServiceImg.GetImage(uint64(bgId))
 		if err != nil {
 			log.Printf("[WARN] failed to load background by its id %+v", err)
+			render.Status(r, 500)
 			render.JSON(w, r, R.JSON{
 				"error": "failed to load background by its id",
 			})
-			render.Status(r, 500)
+			return
 		}
 	}
 
-	barcode, err := strconv.Atoi(barcodeStr)
-	if err != nil {
-		log.Printf("[WARN] failed to atoi %+v", err)
-		render.JSON(w, r, R.JSON{
-			"error": "failed to atoi",
-		})
-		render.Status(r, 500)
-		return
-	}
-
-	_, img, err := i.ServiceImg.GetImage(uint64(barcode))
+	_, img, err := i.ServiceImg.GetImageByBarcode(barcodeStr)
 	if err != nil {
 		log.Printf("[WARN] failed to get image %+v", err)
+		render.Status(r, 500)
 		render.JSON(w, r, R.JSON{
 			"error": "failed to get image from db",
 		})
-		render.Status(r, 500)
 		return
 	}
 
@@ -225,38 +216,38 @@ func (i ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
 		iowr, err := writer.CreateFormFile("image", "img.jpg")
 		if err != nil {
 			log.Printf("[WARN] failed to create image form field %+v", err)
+			render.Status(r, 500)
 			render.JSON(w, r, R.JSON{
 				"error": "failed to create multipart body",
 			})
-			render.Status(r, 500)
 			return
 		}
 		_, err = io.Copy(iowr, img)
 		if err != nil {
 			log.Printf("[WARN] failed to write image to multipart body %+v", err)
+			render.Status(r, 500)
 			render.JSON(w, r, R.JSON{
 				"error": "failed to create multipart body",
 			})
-			render.Status(r, 500)
 			return
 		}
 
 		iowr, err = writer.CreateFormFile("background", "bg.jpg")
 		if err != nil {
 			log.Printf("[WARN] failed to create multipart body %+v", err)
+			render.Status(r, 500)
 			render.JSON(w, r, R.JSON{
 				"error": "failed to create multipart body",
 			})
-			render.Status(r, 500)
 			return
 		}
 		_, err = io.Copy(iowr, bg)
 		if err != nil {
 			log.Printf("[WARN] failed to write background to multipart body %+v", err)
+			render.Status(r, 500)
 			render.JSON(w, r, R.JSON{
 				"error": "failed to create multipart body",
 			})
-			render.Status(r, 500)
 			return
 		}
 
@@ -264,10 +255,10 @@ func (i ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
 		req, err := http.NewRequest("POST", i.ImageProcServiceURL+"replace-background", body)
 		if err != nil {
 			log.Printf("[WARN] failed to initialize request to replace background %+v", err)
+			render.Status(r, 500)
 			render.JSON(w, r, R.JSON{
 				"error": "failed to create multipart body",
 			})
-			render.Status(r, 500)
 			return
 		}
 		req.Header.Set("Content-Type", writer.FormDataContentType())
@@ -275,29 +266,29 @@ func (i ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Printf("[WARN] failed to send request to replace background %+v", err)
+			render.Status(r, 500)
 			render.JSON(w, r, R.JSON{
 				"error": "failed to send request to replace background",
 			})
-			render.Status(r, 500)
 			return
 		} else {
 			body := &bytes.Buffer{}
 			_, err := body.ReadFrom(resp.Body)
 			if err != nil {
 				log.Printf("[WARN] failed to read body from response from request to replace background %+v", err)
+				render.Status(r, 500)
 				render.JSON(w, r, R.JSON{
 					"error": "failed to read body from response from request to replace background",
 				})
-				render.Status(r, 500)
 				return
 			}
 			err = resp.Body.Close()
 			if err != nil {
 				log.Printf("[WARN] failed to close response body from request to replace background %+v", err)
+				render.Status(r, 500)
 				render.JSON(w, r, R.JSON{
 					"error": "failed to close response body from request to replace background ",
 				})
-				render.Status(r, 500)
 				return
 			}
 		}

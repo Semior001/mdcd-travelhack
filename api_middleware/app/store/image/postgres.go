@@ -61,3 +61,11 @@ func (s *PgImageStorage) CheckBarcode(barcode string) (json R.JSON, err error) {
 	}
 	return R.JSON{"ok": true}, nil
 }
+
+func (s *PgImageStorage) getImageByBarcode(barcode string) (imgMetaData *Image, err error) {
+	image := Image{BarCode: barcode}
+	if err := s.db.Select(&image); err != nil {
+		return nil, errors.Wrapf(err, "failed to load image from db by barcode")
+	}
+	return &image, nil
+}

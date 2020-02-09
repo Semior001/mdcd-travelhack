@@ -31,6 +31,7 @@ type Store interface {
 	getImage(id uint64) (imgMetaData Image, err error)
 	GetBackgrounds() (ids []uint64, err error)
 	CheckBarcode(barcode string) (json R.JSON, err error)
+	getImageByBarcode(barcode string) (imgMetaData *Image, err error)
 }
 
 type Service struct {
@@ -71,7 +72,8 @@ func NewService(opts ServiceOpts) (*Service, error) {
 		return nil, err
 	}
 	return &Service{
-		Store: db,
+		Store:            db,
+		LocalStoragePath: opts.LocalStoragePath,
 	}, nil
 }
 
@@ -114,6 +116,18 @@ func (s *Service) GetImage(imgId uint64) (imgMetaData Image, reader io.ReadClose
 		return imgMetaData, nil, errors.Wrap(err, "can't find image in db")
 	}
 
+	fh, err := os.Open(path.Join(s.LocalStoragePath, imgMetaData.LocalFilename))
+	if err != nil {
+		return imgMetaData, nil, errors.Wrap(err, "can't load image from local media path")
+	}
+	return imgMetaData, fh, nil
+}
+
+func (s *Service) GetImageByBarcode(barcode string) (*Image, io.ReadCloser, error) {
+	imgMetaData, err := s.getImageByBarcode(barcode)
+	if err != nil {
+		return imgMetaData, nil, errors.Wrap(err, "can't find image in db")
+	}
 	fh, err := os.Open(path.Join(s.LocalStoragePath, imgMetaData.LocalFilename))
 	if err != nil {
 		return imgMetaData, nil, errors.Wrap(err, "can't load image from local media path")
