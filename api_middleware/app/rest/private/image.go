@@ -197,17 +197,7 @@ func (i ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	barcode, err := strconv.Atoi(barcodeStr)
-	if err != nil {
-		log.Printf("[WARN] failed to atoi %+v", err)
-		render.Status(r, 500)
-		render.JSON(w, r, R.JSON{
-			"error": "failed to atoi",
-		})
-		return
-	}
-
-	_, img, err := i.ServiceImg.GetImage(uint64(barcode))
+	_, img, err := i.ServiceImg.GetImageByBarcode(barcodeStr)
 	if err != nil {
 		log.Printf("[WARN] failed to get image %+v", err)
 		render.Status(r, 500)
