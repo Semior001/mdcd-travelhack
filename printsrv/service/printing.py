@@ -1,3 +1,4 @@
+import os
 import platform
 
 from printsrv.rest import PrintingService
@@ -12,14 +13,15 @@ class PrintingServiceImpl(PrintingService):
 
         platform_name: str = platform.system().capitalize()
 
-        if platform_name == 'LINUX' or platform_name == 'DARWIN':
-            import subprocess
-            lpr = subprocess.Popen("/usr/bin/lpr", stdin=subprocess.PIPE)
-            lpr.stdin.write(img_bytes)
-        else:
-            import os
-            filepath = os.path.join(self.local_storage_path, "tmp.jpg")
-            with open(filepath, 'wb') as f:
-                f.write(img_bytes)
+        # import os
+        filepath = os.path.join(self.local_storage_path, "tmp.jpg")
+        with open(filepath, 'wb') as f:
+            f.write(img_bytes)
 
-            os.startfile(filepath, "print")
+        # if platform_name == 'LINUX' or platform_name == 'DARWIN':
+        os.system("lpr {}".format(filepath))
+
+        # else:
+        #
+        #
+        #     os.startfile(filepath, "print")
