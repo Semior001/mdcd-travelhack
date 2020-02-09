@@ -3,6 +3,7 @@ package image
 import (
 	"github.com/Semior001/mdcd-travelhack/app/utils"
 	"github.com/go-pg/pg/v9"
+	R "github.com/go-pkgz/rest"
 	"github.com/pkg/errors"
 	"log"
 )
@@ -42,4 +43,21 @@ func (s *PgImageStorage) getImage(id uint64) (Image, error) {
 		return Image{}, err
 	}
 	return image, nil
+}
+
+func (s *PgImageStorage) GetBackgrounds() ([]uint64, error) {
+	var ids []uint64
+	var imgType string = "background"
+	if err := s.db.Model((*Image)(nil)).Where("img_type = ?", imgType).ColumnExpr("array_agg(id)").Select(pg.Array(&ids)); err != nil {
+		return nil, err
+	}
+	return ids, nil
+}
+
+func (s *PgImageStorage) CheckBarcode(barcode string) (json R.JSON, err error) {
+	image := Image{BarCode: barcode}
+	if err := s.db.Select(&image); err != nil {
+		return R.JSON{}, err
+	}
+	return R.JSON{"ok": true}, nil
 }

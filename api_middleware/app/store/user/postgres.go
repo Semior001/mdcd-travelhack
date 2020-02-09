@@ -61,8 +61,8 @@ func (s *PgStorage) GetUser(id uint64) (*User, error) {
 
 // GetUserCredentials returns basic email and password information about the user
 func (s *PgStorage) GetUserCredentials(email string) (*User, error) {
-	user := User{Email: email}
-	if err := s.db.Model(&user).Column("email", "password").Select(&user); err != nil {
+	user := User{}
+	if err := s.db.Model(&user).Where("email = ?", email).Column("id", "email", "password").Select(&user); err != nil {
 		return nil, err
 	}
 	return &user, nil

@@ -3,6 +3,7 @@ package image
 import (
 	"github.com/Semior001/mdcd-travelhack/app/store/user"
 	"github.com/go-pg/pg/v9"
+	R "github.com/go-pkgz/rest"
 	"github.com/pkg/errors"
 	"github.com/segmentio/ksuid"
 	"io"
@@ -15,6 +16,8 @@ import (
 
 type Image struct {
 	ID            uint64
+	BarCode       string
+	ImgType       string
 	LocalFilename string
 	UserId        uint64
 	AddedBy       *user.User
@@ -26,6 +29,8 @@ type Store interface {
 	Migrate(force bool) error
 	putImage(imgMetaData Image) (imgId uint64, err error)
 	getImage(id uint64) (imgMetaData Image, err error)
+	GetBackgrounds() (ids []uint64, err error)
+	CheckBarcode(barcode string) (json R.JSON, err error)
 }
 
 type Service struct {
@@ -72,7 +77,7 @@ func NewService(opts ServiceOpts) (*Service, error) {
 
 // PutImage stores image in the local path, given to the Service
 // and stores all metadata in the database via calling Store.putImage
-func (s *Service) PutImage(userId uint64, reader io.Reader) (imgId uint64, err error) {
+func (s *Service) PutImage(userId uint64, imgType string, reader io.Reader) (imgId uint64, err error) {
 	fileName := ksuid.New().String()
 	imFile := path.Join(s.LocalStoragePath, fileName)
 
@@ -94,6 +99,7 @@ func (s *Service) PutImage(userId uint64, reader io.Reader) (imgId uint64, err e
 	imgId, err = s.putImage(Image{
 		LocalFilename: fileName,
 		UserId:        userId,
+		ImgType:       imgType,
 	})
 	if err != nil {
 		return 0, errors.Wrapf(err, "can't put image metadata into db")
