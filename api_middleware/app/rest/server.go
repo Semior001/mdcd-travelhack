@@ -23,6 +23,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	"github.com/go-pkgz/auth"
 	R "github.com/go-pkgz/rest"
 )
@@ -78,7 +79,7 @@ func (s *Rest) makeAuth() *auth.Service {
 		AvatarStore:    avatar.NewNoOp(),
 		JWTQuery:       "jwt",
 		Logger:         logger.Std,
-		DisableXSRF:    false,
+		DisableXSRF:    true,
 		DisableIAT:     true,
 		SecretReader: token.SecretFunc(func(_ string) (string, error) {
 			// todo is thread-safe?
@@ -125,6 +126,18 @@ func (s *Rest) routes() chi.Router {
 	r := chi.NewRouter()
 	r.Use(middleware.RealIP)
 	r.Use(R.AppInfo(s.AppName, s.AppAuthor, s.Version), R.Ping)
+
+	crs := cors.New(cors.Options{
+		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+		AllowedHeaders:   []string{"Origin", "X-Requested-With", "Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	})
+	r.Use(crs.Handler)
 
 	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
 		log.Printf("[DEBUG] registered route: %s %s\n", method, route)
