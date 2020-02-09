@@ -99,7 +99,15 @@ func (s *ServeCommand) Execute(_ []string) error {
 				JWT    time.Duration
 				Cookie time.Duration
 			}
-		}{},
+		}{
+			TTL: struct {
+				JWT    time.Duration
+				Cookie time.Duration
+			}{
+				JWT:    time.Hour * 5000,
+				Cookie: time.Hour * 5000,
+			},
+		},
 	}
 	r.Run(8080)
 	return nil
