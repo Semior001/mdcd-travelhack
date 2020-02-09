@@ -91,8 +91,9 @@ func (s *ServeCommand) Execute(_ []string) error {
 		ImageService:   *im,
 		UserController: private.UserController{ServiceUsr: *us},
 		ImageController: private.ImageController{
-			ServiceImg: *im,
-			ServiceUsr: *us,
+			ServiceImg:          *im,
+			ServiceUsr:          *us,
+			ImageProcServiceURL: "http://imgproc:8082/",
 		},
 		Auth: struct {
 			TTL struct {

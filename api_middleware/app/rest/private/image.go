@@ -1,6 +1,7 @@
 package private
 
 import (
+	"bytes"
 	"github.com/Semior001/mdcd-travelhack/app/rest/http_errors"
 	"github.com/Semior001/mdcd-travelhack/app/store/image"
 	"github.com/Semior001/mdcd-travelhack/app/store/user"
@@ -9,6 +10,7 @@ import (
 	R "github.com/go-pkgz/rest"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 	"strings"
@@ -17,8 +19,9 @@ import (
 // ImageController defines some parameters that are necessary to
 // mount controller methods
 type ImageController struct {
-	ServiceImg image.Service
-	ServiceUsr user.Service
+	ServiceImg          image.Service
+	ServiceUsr          user.Service
+	ImageProcServiceURL string
 }
 
 // ImageRest defines methods to mount to the web-server
@@ -139,8 +142,259 @@ func (i ImageController) GetImage(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// PostFilter commits filter and bg replacement and returns them to client
 func (i ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
-	panic("implement me")
+	err := r.ParseMultipartForm(20480)
+	if err != nil {
+		log.Printf("[WARN] failed to parse multipart form %+v", err)
+		render.JSON(w, r, R.JSON{
+			"error": "failed to parse multipart form",
+		})
+		render.Status(r, 500)
+	}
+
+	bgFiles := r.MultipartForm.File["background"]
+	bgIdStr := r.MultipartForm.Value["background_id"][0]
+	filterName := r.MultipartForm.Value["filter_name"][0]
+	barcodeStr := r.MultipartForm.Value["barcode"][0]
+
+	var bg io.Reader
+
+	if len(bgFiles) == 1 {
+		bg, err = bgFiles[0].Open()
+		if err != nil {
+			log.Printf("[WARN] failed to open bgfile %+v", err)
+			render.JSON(w, r, R.JSON{
+				"error": "failed to open bgfile",
+			})
+			render.Status(r, 500)
+			return
+		}
+	}
+
+	bgId, err := strconv.Atoi(bgIdStr)
+	if err != nil {
+		log.Printf("[WARN] failed to atoi %+v", err)
+		render.JSON(w, r, R.JSON{
+			"error": "failed to atoi",
+		})
+		render.Status(r, 500)
+		return
+	}
+
+	if bgId != -1 {
+		_, bg, err = i.ServiceImg.GetImage(uint64(bgId))
+		if err != nil {
+			log.Printf("[WARN] failed to load background by its id %+v", err)
+			render.JSON(w, r, R.JSON{
+				"error": "failed to load background by its id",
+			})
+			render.Status(r, 500)
+		}
+	}
+
+	barcode, err := strconv.Atoi(barcodeStr)
+	if err != nil {
+		log.Printf("[WARN] failed to atoi %+v", err)
+		render.JSON(w, r, R.JSON{
+			"error": "failed to atoi",
+		})
+		render.Status(r, 500)
+		return
+	}
+
+	_, img, err := i.ServiceImg.GetImage(uint64(barcode))
+	if err != nil {
+		log.Printf("[WARN] failed to get image %+v", err)
+		render.JSON(w, r, R.JSON{
+			"error": "failed to get image from db",
+		})
+		render.Status(r, 500)
+		return
+	}
+
+	// replacing background
+	if bg != nil {
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+
+		// writing image
+		iowr, err := writer.CreateFormFile("image", "img.jpg")
+		if err != nil {
+			log.Printf("[WARN] failed to create image form field %+v", err)
+			render.JSON(w, r, R.JSON{
+				"error": "failed to create multipart body",
+			})
+			render.Status(r, 500)
+			return
+		}
+		_, err = io.Copy(iowr, img)
+		if err != nil {
+			log.Printf("[WARN] failed to write image to multipart body %+v", err)
+			render.JSON(w, r, R.JSON{
+				"error": "failed to create multipart body",
+			})
+			render.Status(r, 500)
+			return
+		}
+
+		iowr, err = writer.CreateFormFile("background", "bg.jpg")
+		if err != nil {
+			log.Printf("[WARN] failed to create multipart body %+v", err)
+			render.JSON(w, r, R.JSON{
+				"error": "failed to create multipart body",
+			})
+			render.Status(r, 500)
+			return
+		}
+		_, err = io.Copy(iowr, bg)
+		if err != nil {
+			log.Printf("[WARN] failed to write background to multipart body %+v", err)
+			render.JSON(w, r, R.JSON{
+				"error": "failed to create multipart body",
+			})
+			render.Status(r, 500)
+			return
+		}
+
+		// calling replace_background
+		req, err := http.NewRequest("POST", i.ImageProcServiceURL+"replace-background", body)
+		if err != nil {
+			log.Printf("[WARN] failed to initialize request to replace background %+v", err)
+			render.JSON(w, r, R.JSON{
+				"error": "failed to create multipart body",
+			})
+			render.Status(r, 500)
+			return
+		}
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Printf("[WARN] failed to send request to replace background %+v", err)
+			render.JSON(w, r, R.JSON{
+				"error": "failed to send request to replace background",
+			})
+			render.Status(r, 500)
+			return
+		} else {
+			body := &bytes.Buffer{}
+			_, err := body.ReadFrom(resp.Body)
+			if err != nil {
+				log.Printf("[WARN] failed to read body from response from request to replace background %+v", err)
+				render.JSON(w, r, R.JSON{
+					"error": "failed to read body from response from request to replace background",
+				})
+				render.Status(r, 500)
+				return
+			}
+			err = resp.Body.Close()
+			if err != nil {
+				log.Printf("[WARN] failed to close response body from request to replace background %+v", err)
+				render.JSON(w, r, R.JSON{
+					"error": "failed to close response body from request to replace background ",
+				})
+				render.Status(r, 500)
+				return
+			}
+		}
+	}
+
+	// gathering new request to filters
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	// writing image
+	iowr, err := writer.CreateFormFile("image", "img.jpg")
+	if err != nil {
+		log.Printf("[WARN] failed to create image form field %+v", err)
+		render.JSON(w, r, R.JSON{
+			"error": "failed to create multipart body",
+		})
+		render.Status(r, 500)
+		return
+	}
+	_, err = io.Copy(iowr, img)
+	if err != nil {
+		log.Printf("[WARN] failed to write image to multipart body %+v", err)
+		render.JSON(w, r, R.JSON{
+			"error": "failed to create multipart body",
+		})
+		render.Status(r, 500)
+		return
+	}
+	err = writer.WriteField("filter_name", filterName)
+	if err != nil {
+		log.Printf("[WARN] failed to write filter name to multipart body %+v", err)
+		render.JSON(w, r, R.JSON{
+			"error": "failed to write filter name to multipart body",
+		})
+		render.Status(r, 500)
+		return
+	}
+	// calling apply_filter
+	req, err := http.NewRequest("POST", i.ImageProcServiceURL+"apply-filter", body)
+	if err != nil {
+		log.Printf("[WARN] failed to initialize request to replace background %+v", err)
+		render.JSON(w, r, R.JSON{
+			"error": "failed to create multipart body",
+		})
+		render.Status(r, 500)
+		return
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("[WARN] failed to send request to replace background %+v", err)
+		render.JSON(w, r, R.JSON{
+			"error": "failed to send request to replace background",
+		})
+		render.Status(r, 500)
+		return
+	} else {
+		body := &bytes.Buffer{}
+		_, err := body.ReadFrom(resp.Body)
+		if err != nil {
+			log.Printf("[WARN] failed to read body from response from request to replace background %+v", err)
+			render.JSON(w, r, R.JSON{
+				"error": "failed to read body from response from request to replace background",
+			})
+			render.Status(r, 500)
+			return
+		}
+		err = resp.Body.Close()
+		if err != nil {
+			log.Printf("[WARN] failed to close response body from request to replace background %+v", err)
+			render.JSON(w, r, R.JSON{
+				"error": "failed to close response body from request to replace background ",
+			})
+			render.Status(r, 500)
+			return
+		}
+	}
+
+	imgContentType := func(img string) string {
+		img = strings.ToLower(img)
+		switch {
+		case strings.HasSuffix(img, ".png"):
+			return "image/png"
+		case strings.HasSuffix(img, ".jpg") || strings.HasSuffix(img, ".jpeg"):
+			return "image/jpeg"
+		case strings.HasSuffix(img, ".gif"):
+			return "image/gif"
+		}
+		return "image/*"
+
+	}
+
+	w.Header().Set("Content-Type", imgContentType(".jpg"))
+	//w.Header().Set("Content-Length", strconv.Itoa(int()))
+	w.WriteHeader(http.StatusOK)
+	if _, err := io.Copy(w, resp.Body); err != nil {
+		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrInternal)
+		return
+	}
 }
 
 func (i ImageController) CommitImage(w http.ResponseWriter, r *http.Request) {
