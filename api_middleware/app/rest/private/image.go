@@ -55,8 +55,10 @@ func (i ImageController) CheckBarcode(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, json)
 }
 
+// SaveImage stores image into the database
 func (i ImageController) SaveImage(w http.ResponseWriter, r *http.Request) {
 	imgType := r.URL.Query().Get("imgType")
+	barcode := r.URL.Query().Get("barcode")
 	usrToken, err := token.GetUserInfo(r)
 	if err != nil {
 		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrDBStoring)
@@ -76,7 +78,7 @@ func (i ImageController) SaveImage(w http.ResponseWriter, r *http.Request) {
 	fh := r.MultipartForm.File["image"]
 	reader, err := fh[0].Open()
 
-	imgId, err := i.ServiceImg.PutImage(userId, imgType, reader)
+	imgId, err := i.ServiceImg.PutImage(userId, barcode, imgType, reader)
 	if err != nil {
 		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrPutImage)
 		return
@@ -137,6 +139,7 @@ func (i ImageController) GetBackground(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetImage returns image itself
 func (i ImageController) GetImage(w http.ResponseWriter, r *http.Request) {
 	//imgId := r.URL.Query().Get("imgId")
 

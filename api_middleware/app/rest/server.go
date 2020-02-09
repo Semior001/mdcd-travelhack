@@ -158,6 +158,7 @@ func (s *Rest) routes() chi.Router {
 		r.Post("/add_image", s.ImageController.SaveImage)
 		r.Get("/backgrounds", s.ImageController.GetBackgrounds)
 		r.Get("/get_background", s.ImageController.GetBackground)
+		r.Post("/apply_effects", s.ImageController.PostFilter)
 
 		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write([]byte("it works"))
