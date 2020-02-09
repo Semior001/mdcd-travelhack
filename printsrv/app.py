@@ -6,9 +6,9 @@ from argparse import ArgumentParser
 
 from flask import Flask
 
-import rest, processing
+import rest, service
 
-APP_NAME = "imgproc"
+APP_NAME = "printingsrv"
 APP_AUTHOR = "midnight coders"
 APP_VERSION = "unknown"
 
@@ -62,11 +62,12 @@ def main():
     # flask initialization
     app = Flask(__name__)
 
-    chroma_key_ctrl = rest.ChromaKeyController(processing.ChromaKeyServiceImpl())
-    filtering_ctrl = rest.FilterController(processing.FilteringServiceImpl())
+    chroma_key_ctrl = rest.PrintingController(service.PrintingServiceImpl(
+        # local_storage_path="C:\\Tmp\\"
+        local_storage_path="/tmp/printsrv"
+    ))
 
     app.register_blueprint(chroma_key_ctrl.blueprint)
-    app.register_blueprint(filtering_ctrl.blueprint)
 
     show_all_routes(app)
 

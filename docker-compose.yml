@@ -25,9 +25,38 @@ services:
             SERVICEURL: '${SERVICEURL}'
             RU_EMAIL: '${RU_EMAIL}'
             RU_PASSWORD: '${RU_PASSWORD}'
+            IMGPROC_SERVICE_URL: 'http://imgproc:8082/'
+            PRINTSRV_SERVICE_URL: 'http://printsrv:8083/'
         ports:
             - 8080:8080
         command: ["/srv/scripts/wait-for-pgsql.sh", "db", "/entrypoint.sh", "serve"]
+
+    imgproc:
+        build:
+            context: imgproc
+            dockerfile: Dockerfile
+        image: semior/mdcd_imgproc:latest
+        container_name: "mdcd_imgproc"
+        hostname: "mdcd_imgproc"
+        environment:
+            DEBUG: 'true'
+            SERVICEURL: 'http://0.0.0.0:8082/'
+        ports:
+            - 8082:8082
+
+    printsrv:
+        build:
+            context: printsrv
+            dockerfile: Dockerfile
+        image: semior/mdcd_printsrv:latest
+        container_name: "mdcd_printsrv"
+        hostname: "mdcd_printsrv"
+        environment:
+            DEBUG: 'true'
+            SERVICEURL: 'http://0.0.0.0:8083/'
+        ports:
+            - 8083:8083
+
     db:
         image: postgres:latest
         environment:

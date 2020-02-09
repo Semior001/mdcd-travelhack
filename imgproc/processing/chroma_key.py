@@ -1,5 +1,5 @@
 import cv2
-from imgproc import rest
+import rest
 
 import numpy as np
 
