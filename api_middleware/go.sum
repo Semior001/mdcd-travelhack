@@ -26,6 +26,8 @@ github.com/gavv/httpexpect v0.0.0-20180803094507-bdde30871313 h1:GSPjYG49Uqn3S1o
 github.com/gavv/httpexpect v0.0.0-20180803094507-bdde30871313/go.mod h1:x+9tiU1YnrOvnB725RkpoLv1M62hOWzwo5OXotisrKc=
 github.com/gavv/monotime v0.0.0-20171021193802-6f8212e8d10d h1:oYXrtNhqNKL1dVtKdv8XUq5zqdGVFNQ0/4tvccXZOLM=
 github.com/gavv/monotime v0.0.0-20171021193802-6f8212e8d10d/go.mod h1:vmp8DIyckQMXOPl0AQVHt+7n5h7Gb7hS6CUydiV8QeA=
+github.com/globalsign/mgo v0.0.0-20180615134936-113d3961e731 h1:y7wyeiA6T+TT+HGC9DYypvLkUeg99N4rqHMzn2MmjYk=
+github.com/globalsign/mgo v0.0.0-20180615134936-113d3961e731/go.mod h1:xkRDCp4j0OGD1HRkm4kmhM+pmpv3AKq5SU7GMg4oO/Q=
 github.com/go-chi/chi v4.0.3+incompatible h1:gakN3pDJnzZN5jqFV2TEdF66rTfKeITyR8qu6ekICEY=
 github.com/go-chi/chi v4.0.3+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/cors v1.0.0 h1:e6x8k7uWbUwYs+aXDoiUzeQFT6l0cygBYyNhD7/1Tg0=
@@ -44,6 +46,10 @@ github.com/go-pg/zerochecker v0.1.1 h1:av77Qe7Gs+1oYGGh51k0sbZ0bUaxJEdeP0r8YE64D
 github.com/go-pg/zerochecker v0.1.1/go.mod h1:NJZ4wKL0NmTtz0GKCoJ8kym6Xn/EQzXRl2OnAe7MmDo=
 github.com/go-pkgz/auth v0.9.1-0.20200204180402-9708f17fe617 h1:VuMbEZtbLYKeT2jS8f2D/O7Ub1EqyCLl0+WVyxTDANw=
 github.com/go-pkgz/auth v0.9.1-0.20200204180402-9708f17fe617/go.mod h1:8Kiold3xA9VUiYZwMyMhwBgiGImZFoL/EmtO9lSIQxo=
+github.com/go-pkgz/lgr v0.2.2 h1:HSOqMVoetAfvA40Gpy/X/HGyV0UUafIMPgp+SdZends=
+github.com/go-pkgz/lgr v0.2.2/go.mod h1:hBM1NM/SoYdlrykgdgJWGrZ/TM/XaZIjRbJfx7NkMm8=
+github.com/go-pkgz/mongo v1.1.2 h1:2Vqn3CWQJkkx4gxxDiQUitAW2FN/CH26lKHkipmpKcc=
+github.com/go-pkgz/mongo v1.1.2/go.mod h1:0NkWnzpiUxoL5fYZuttCtJrpC67oNDidfYxcdPqHTf0=
 github.com/go-pkgz/rest v1.4.1 h1:DmaVLPH2O7yLehrWOW0uz01d2mVHz9fBR/iuTiPRzaw=
 github.com/go-pkgz/rest v1.4.1/go.mod h1:COazNj35u3RXAgQNBr6neR599tYP3URiOpsu9p0rOtk=
 github.com/go-session/session v3.1.2+incompatible/go.mod h1:8B3iivBQjrz/JtC68Np2T1yBBLxTan3mn/3OM0CyRt0=
@@ -129,6 +135,7 @@ github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d/go.mod h1
 github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c h1:Ho+uVpkel/udgjbwB5Lktg9BtvJSh2DT0Hi6LPSyI2w=
 github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c/go.mod h1:XDJAKZRPZ1CvBcN2aX5YOUTYGHki24fSF0Iv48Ibg0s=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
