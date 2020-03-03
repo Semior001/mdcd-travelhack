@@ -1,0 +1,96 @@
+<div fxLayout="row wrap">
+  <!-- column -->
+  <div class="img-container" fxFlex.gt-lg="66" fxFlex.gt-md="66" fxFlex.gt-xs="100" fxFlex="100">
+    <mat-card>
+      <mat-card-content>
+        <div *ngIf="imageUrl === null" class="get-img">
+          <form [formGroup]="form" (ngSubmit)="onBarcodeSubmit()">
+            <mat-form-field>
+              <input matInput type="number" placeholder="Введите баркод" formControlName="barcode" name="barcode">
+              <mat-error *ngIf="form.get('barcode').invalid && form.get('barcode').touched">
+                <span *ngIf="form.get('barcode').hasError('required')">Введите barcode из вашего чека</span>
+              </mat-error>
+            </mat-form-field>
+            <input
+              style="display: none"
+              type="file"
+              (change)="OnImgToUploadSelected($event)"
+              #imgUpload
+            >
+            <button class="upload-img" mat-raised-button type="button" color="primary" (click)="imgUpload.click()"
+                    [disabled]="form.invalid">Загрузить изображение
+            </button>
+            <!--            <button class="get-img-from-barcode" mat-raised-button type="submit" color="primary"-->
+            <!--                    [disabled]="form.invalid" (click)="downloadImage()">Получить изображение-->
+            <!--            </button>-->
+          </form>
+        </div>
+        <div class="d-flex flex-wrap">
+          <img *ngIf="imageUrl !== null" class="main-img"
+               [src]="_DomSanitizationService.bypassSecurityTrustUrl(imageUrl)">
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <!-- column -->
+  <!-- column -->
+  <div class="effects-container" fxFlex.gt-lg="33" fxFlex.gt-md="33" fxFlex.gt-xs="100" fxFlex="100">
+    <mat-card>
+      <mat-card-content>
+        <mat-card-title>Эффекты</mat-card-title>
+        <mat-card-subtitle>Просто кликните на понравившийся эффект</mat-card-subtitle>
+      </mat-card-content>
+      <mat-card-content class="right-buttons">
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="saveChanges()"
+          [disabled]="!(imageId !== null && (filterName !== null || backgroundId !== null || selectedFile !== null))"
+        >Сохранить
+        </button>
+        <button
+          mat-raised-button
+          color="warn"
+          type="button"
+          (click)="resetMain()"
+        >Сбросить изображение
+        </button>
+      </mat-card-content>
+      <mat-card-content>
+        <div class="my-spinner" *ngIf="isLoading">
+          <mat-spinner></mat-spinner>
+        </div>
+        <h3>Фильтры</h3>
+        <div class="filters">
+          <div class="effect-card" (click)="onFilterClick('base')">
+            <img src="../../assets/filters/base.jpg">
+            <p>Без фильтра</p>
+          </div>
+          <div class="effect-card" *ngFor="let filterName of filters" (click)="onFilterClick(filterName)">
+            <img src="../../assets/filters/{{ filterName }}.jpg">
+            <p>{{ filterName | titlecase }}</p>
+          </div>
+        </div>
+        <div *ngIf="!isLoading">
+          <h3>Фоновые изображения</h3>
+          <div class="filters">
+            <div class="effect-card" *ngFor="let b of background_ids" (click)="onBackgroundClick(b)">
+              <img src="{{ apiUrl }}/get_background?id={{ b }}">
+            </div>
+            <div class="effect-card" (click)="fileInput.click()">
+              <img src="../../assets/imgs/upload.png">
+            </div>
+            <input
+              style="display: none"
+              type="file"
+              (change)="onFileSelected($event)"
+              #fileInput
+            >
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <!-- column -->
+</div>

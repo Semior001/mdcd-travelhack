@@ -1,0 +1,44 @@
+<mat-card>
+  <mat-card-content>
+    <mat-card-title>Пользователи</mat-card-title>
+    <mat-card-subtitle>Управление пользователями</mat-card-subtitle>
+    <div *ngIf="!isLoading">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <mat-form-field>
+          <input matInput type="email" placeholder="E-mail" formControlName="email" name="email">
+          <mat-error *ngIf="form.get('email').invalid && form.get('email').touched">
+            <span *ngIf="form.get('email').hasError('required')">Введите E-mail</span>
+            <span *ngIf="form.get('email').hasError('email')">E-mail должен быть верного формата</span>
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Пароль" formControlName="password" name="password" type="password">
+          <mat-error *ngIf="form.get('password').invalid && form.get('password').touched">
+            <span *ngIf="form.get('password').hasError('required')">Введите пароль</span>
+            <span *ngIf="form.get('password').hasError('minlength')">Пароль должен содержать больше 4 символов</span>
+          </mat-error>
+        </mat-form-field>
+        <mat-radio-group aria-label="Роль" formControlName="role">
+          <mat-radio-button value="1">Администратор</mat-radio-button>
+          <br>
+          <mat-radio-button value="0">Обычный сотрудник</mat-radio-button>
+          <br>
+        </mat-radio-group>
+        <br>
+        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Создать нового пользователя</button>
+      </form>
+      <mat-list>
+        <mat-list-item *ngFor="let user of users">
+          <h3 matLine>E-mail: {{ user?.Email }} - <a [routerLink]="['/admin/users/', user.ID]">Редактировать
+            пользователя</a></h3>
+          <p matLine class="text-muted">Создан - {{ user?.CreatedAt | date:medium }}</p>
+          <p matLine class="text-muted">Последнее изменение - {{ user?.UpdatedAt | date:medium }}</p>
+          <p matLine class="text-muted">Права - {{ user?.Privileges['admin'] ? 'Администратор' : 'Обычный сотрудник' }}</p>
+        </mat-list-item>
+      </mat-list>
+    </div>
+    <div class="my-spinner" *ngIf="isLoading">
+      <mat-spinner></mat-spinner>
+    </div>
+  </mat-card-content>
+</mat-card>

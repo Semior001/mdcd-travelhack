@@ -1,0 +1,13 @@
+<mat-card>
+  <mat-card-content>
+    <mat-card-title>Фоны</mat-card-title>
+    <mat-card-subtitle>Управление фонами</mat-card-subtitle>
+    <input
+      style="display: none"
+      type="file"
+      (change)="onFileSelected($event)"
+      #fileInput
+    >
+    <button mat-raised-button color="primary" type="button" (click)="fileInput.click()">Загрузить фон</button>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,77 @@
+<!--&lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--&lt;!&ndash; Main wrapper - style you can find in pages.scss &ndash;&gt;-->
+<!--&lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--<div class="main-container">-->
+<!--  &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--  &lt;!&ndash; Topbar - style you can find in header.scss &ndash;&gt;-->
+<!--  &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--&lt;!&ndash;  <mat-toolbar color="primary" class="topbar telative">&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; ============================================================== &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; Logo - style you can find in header.scss &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; ============================================================== &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="navbar-header">&ndash;&gt;-->
+<!--&lt;!&ndash;      <a class="navbar-brand" href="index.html">&ndash;&gt;-->
+<!--&lt;!&ndash;        &lt;!&ndash; Logo icon &ndash;&gt;<b>&ndash;&gt;-->
+<!--&lt;!&ndash;        &lt;!&ndash;You can put here icon as well // <i class="wi wi-sunset"></i> //&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        &lt;!&ndash; Dark Logo icon &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <img src="assets/images/logo-icon.png" alt="homepage" class="dark-logo">&ndash;&gt;-->
+<!--&lt;!&ndash;        &lt;!&ndash; Light Logo icon &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <img src="assets/images/logo-light-icon.png" alt="homepage" class="light-logo">&ndash;&gt;-->
+<!--&lt;!&ndash;      </b>&ndash;&gt;-->
+<!--&lt;!&ndash;        &lt;!&ndash;End Logo icon &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        &lt;!&ndash; Logo text &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <span fxShow="false" fxShow.gt-xs>&ndash;&gt;-->
+<!--&lt;!&ndash;                 &lt;!&ndash; dark Logo text &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                 <img src="assets/images/logo-text.png" alt="homepage" class="dark-logo">&ndash;&gt;-->
+<!--&lt;!&ndash;          &lt;!&ndash; Light Logo text &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                 <img src="assets/images/logo-light-text.png" class="light-logo" alt="homepage">&ndash;&gt;-->
+<!--&lt;!&ndash;                </span> </a>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; ============================================================== &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; sidebar toggle &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; ============================================================== &ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <button mat-icon-button (click)="snav.toggle()" value="sidebarclosed">&ndash;&gt;-->
+<!--&lt;!&ndash;      <mat-icon>menu</mat-icon>&ndash;&gt;-->
+<!--&lt;!&ndash;    </button>&ndash;&gt;-->
+<!--&lt;!&ndash;    <span fxFlex></span>&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; ============================================================== &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; app header component - style you can find in header.scss / header.component.ts&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; ============================================================== &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <app-header></app-header>&ndash;&gt;-->
+<!--&lt;!&ndash;  </mat-toolbar>&ndash;&gt;-->
+<!--  &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--  &lt;!&ndash; End Topbar - style you can find in pages.scss &ndash;&gt;-->
+<!--  &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--  <mat-sidenav-container class="example-sidenav-container" [style.marginTop.px]="mobileQuery.matches ? 0 : 0">-->
+<!--    &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--    &lt;!&ndash; Sidebar - style you can find in sidebar.scss &ndash;&gt;-->
+<!--    &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--&lt;!&ndash;    <mat-sidenav #snav id="snav" class="dark-sidebar pl-xs" [mode]="mobileQuery.matches ? 'side' : 'over'" fixedTopGap="0" [opened]="mobileQuery.matches" [disableClose]="mobileQuery.matches"  >&ndash;&gt;-->
+<!--&lt;!&ndash;&ndash;&gt;-->
+<!--&lt;!&ndash;      <app-sidebar></app-sidebar>&ndash;&gt;-->
+<!--&lt;!&ndash;&ndash;&gt;-->
+<!--&lt;!&ndash;&ndash;&gt;-->
+<!--&lt;!&ndash;    </mat-sidenav>&ndash;&gt;-->
+<!--    &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--    &lt;!&ndash; Sidebar - style you can find in sidebar.scss &ndash;&gt;-->
+<!--    &lt;!&ndash; ============================================================== &ndash;&gt;-->
+
+<!--    &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--    &lt;!&ndash; Page container - style you can find in pages.scss &ndash;&gt;-->
+<!--    &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--    <mat-sidenav-content class="page-wrapper">-->
+
+<!--      <div class="page-content">-->
+
+<!--        <router-outlet><app-spinner></app-spinner></router-outlet>-->
+
+<!--      </div>-->
+
+<!--    </mat-sidenav-content>-->
+<!--    &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--    &lt;!&ndash; Page container - style you can find in pages.scss &ndash;&gt;-->
+<!--    &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--  </mat-sidenav-container>-->
+<!--</div>-->
+<router-outlet></router-outlet>

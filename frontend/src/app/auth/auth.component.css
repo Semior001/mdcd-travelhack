@@ -1,0 +1,34 @@
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+.auth-card mat-form-field {
+  display: block;
+}
+
+.auth-card {
+  width: 400px;
+}
+
+.auth-card button[type="submit"] {
+  width: 100px;
+  display: block;
+  margin: 0 auto;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.mat-card p.forget-password {
+  text-align: center;
+}
+
+a, a:visited {
+  color: #1e88e5;
+}

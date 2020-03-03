@@ -1,0 +1,85 @@
+mat-card-content {
+  margin-top: -50px;
+}
+
+.main-img {
+  width: 100%;
+  height: auto;
+}
+
+/*.filter-card p {*/
+/*  text-align: center;*/
+/*line-height: 20px;*/
+/*font-size: 20px;*/
+/*}*/
+
+
+.buttons, .filters {
+  margin-bottom: 10px;
+}
+
+.buttons button {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.filters {
+  padding: 10px;
+}
+
+.effect-card {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border-radius: 6px;
+  display: inline-block;
+  width: 130px;
+  height: 160px;
+  margin: 6px;
+}
+
+.effect-card img {
+  width: 130px;
+  height: 130px;
+  border-radius: 6px;
+}
+
+.effect-card p {
+  font-size: 16px;
+  text-align: center;
+  margin-top: -6px;
+}
+
+.effect-card:hover {
+  cursor: pointer;
+}
+
+button.get-img-from-barcode {
+  margin-top: 10px;
+}
+
+div.get-img {
+  text-align: center;
+}
+
+div.get-img form {
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.effects-container {
+  height: 800px;
+  overflow: auto;
+}
+
+.upload-img {
+  margin-right: 10px;
+}
+
+.right-buttons button {
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}

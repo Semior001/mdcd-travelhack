@@ -1,0 +1,11 @@
+/* You can add global styles to this file, and also import other style files */
+.my-spinner mat-spinner {
+  display: block;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+a, a:visited {
+  color: #1e88e5;
+}
