@@ -22,3 +22,4 @@
 db_data
 bin/
 **/venv
+**/__pycache__
