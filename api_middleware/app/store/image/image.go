@@ -25,6 +25,7 @@ type Image struct {
 	UpdatedAt     time.Time
 }
 
+// todo CheckBarcode remove dependency on rest
 type Store interface {
 	Migrate(force bool) error
 	putImage(imgMetaData Image) (imgId uint64, err error)

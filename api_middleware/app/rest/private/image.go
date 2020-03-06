@@ -36,6 +36,7 @@ type ImageRest interface {
 	CheckBarcode(w http.ResponseWriter, r *http.Request)
 }
 
+// todo pass ImageController by reference
 func (i ImageController) CheckBarcode(w http.ResponseWriter, r *http.Request) {
 	sctoken := r.URL.Query().Get("sctoken")
 	if sctoken != "admin_access" {

@@ -146,6 +146,7 @@ func (s *Rest) routes() chi.Router {
 
 	m := s.authenticator.Middleware()
 
+	// todo group image routes
 	r.With(m.Auth).Group(func(r chi.Router) {
 		// protected routes
 		r.Route("/users", func(r chi.Router) {
@@ -157,6 +158,7 @@ func (s *Rest) routes() chi.Router {
 		})
 		r.Post("/add_image", s.ImageController.SaveImage)
 		r.Get("/backgrounds", s.ImageController.GetBackgrounds)
+
 		r.Get("/get_background", s.ImageController.GetBackground)
 		r.Post("/apply_effects", s.ImageController.PostFilter)
 
