@@ -36,8 +36,7 @@ type ImageRest interface {
 	CheckBarcode(w http.ResponseWriter, r *http.Request)
 }
 
-// todo pass ImageController by reference
-func (i ImageController) CheckBarcode(w http.ResponseWriter, r *http.Request) {
+func (i *ImageController) CheckBarcode(w http.ResponseWriter, r *http.Request) {
 	sctoken := r.URL.Query().Get("sctoken")
 	if sctoken != "admin_access" {
 		render.JSON(w, r, R.JSON{"ok": false})
@@ -57,7 +56,7 @@ func (i ImageController) CheckBarcode(w http.ResponseWriter, r *http.Request) {
 }
 
 // SaveImage stores image into the database
-func (i ImageController) SaveImage(w http.ResponseWriter, r *http.Request) {
+func (i *ImageController) SaveImage(w http.ResponseWriter, r *http.Request) {
 	imgType := r.URL.Query().Get("imgType")
 	barcode := r.URL.Query().Get("barcode")
 	usrToken, err := token.GetUserInfo(r)
@@ -89,7 +88,7 @@ func (i ImageController) SaveImage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (i ImageController) GetBackgrounds(w http.ResponseWriter, r *http.Request) {
+func (i *ImageController) GetBackgrounds(w http.ResponseWriter, r *http.Request) {
 	ids, err := i.ServiceImg.GetBackgrounds()
 	if err != nil {
 		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrInternal)
@@ -98,7 +97,7 @@ func (i ImageController) GetBackgrounds(w http.ResponseWriter, r *http.Request) 
 	render.JSON(w, r, ids)
 }
 
-func (i ImageController) GetBackground(w http.ResponseWriter, r *http.Request) {
+func (i *ImageController) GetBackground(w http.ResponseWriter, r *http.Request) {
 	imgId, err := strconv.ParseUint(r.URL.Query().Get("id"), 10, 0)
 	if err != nil {
 		http_errors.SendJSONError(w, r, http.StatusInternalServerError, err, "", http_errors.ErrInternal)
@@ -141,13 +140,13 @@ func (i ImageController) GetBackground(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetImage returns image itself
-func (i ImageController) GetImage(w http.ResponseWriter, r *http.Request) {
+func (i *ImageController) GetImage(w http.ResponseWriter, r *http.Request) {
 	//imgId := r.URL.Query().Get("imgId")
 
 }
 
 // PostFilter commits filter and bg replacement and returns them to client
-func (i ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
+func (i *ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(20480)
 	if err != nil {
 		log.Printf("[WARN] failed to parse multipart form %+v", err)
@@ -392,6 +391,6 @@ func (i ImageController) PostFilter(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (i ImageController) CommitImage(w http.ResponseWriter, r *http.Request) {
+func (i *ImageController) CommitImage(w http.ResponseWriter, r *http.Request) {
 	panic("implement me")
 }

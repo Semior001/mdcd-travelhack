@@ -8,7 +8,7 @@ require (
 	github.com/go-chi/render v1.0.1
 	github.com/go-pg/pg/v9 v9.1.2
 	github.com/go-pkgz/auth v0.9.1-0.20200204180402-9708f17fe617
-	github.com/go-pkgz/mongo v1.1.2 // indirect
+	//github.com/go-pkgz/mongo v1.1.2
 	github.com/go-pkgz/rest v1.4.1
 	github.com/hashicorp/logutils v1.0.0
 	github.com/jessevdk/go-flags v1.4.0
