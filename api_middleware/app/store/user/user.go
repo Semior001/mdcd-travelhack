@@ -42,7 +42,8 @@ type Store interface {
 	Delete(id int) (err error)
 }
 
-// Service provides methods for operating, processing and storing users
+// Service wraps Store interface providing methods that
+// are needed for any Store implementation
 type Service struct {
 	BCryptCost int
 	Store

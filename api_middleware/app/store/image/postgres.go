@@ -6,15 +6,15 @@ import (
 	"time"
 )
 
-// pgStore is a store interface implementation over PostgresSQL
-type pgStore struct {
+// PgStore is a store interface implementation over PostgresSQL
+type PgStore struct {
 	ConnStr string
 
 	connPool *pgx.ConnPool
 }
 
-// newPgStore creates a connection pool to the postgres storage
-func newPgStore(connStr string) (*pgStore, error) {
+// NewPgStore creates a connection pool to the postgres storage
+func NewPgStore(connStr string) (*PgStore, error) {
 	connConf, err := pgx.ParseConnectionString(connStr)
 
 	if err != nil {
@@ -35,28 +35,28 @@ func newPgStore(connStr string) (*pgStore, error) {
 		return nil, errors.Wrapf(err, "failed to initialize pg image store with connstr %s", connStr)
 	}
 
-	return &pgStore{
+	return &PgStore{
 		ConnStr:  connStr,
 		connPool: p,
 	}, nil
 }
 
-func (p *pgStore) putImage(imgMetaData Image) (int, error) {
+func (p *PgStore) putImage(imgMetaData Image) (int, error) {
 	panic("implement me")
 }
 
-func (p *pgStore) getImage(id int) (Image, error) {
+func (p *PgStore) getImage(id int) (Image, error) {
 	panic("implement me")
 }
 
-func (p *pgStore) GetBackgrounds() ([]int, error) {
+func (p *PgStore) GetBackgroundIds() ([]int, error) {
 	panic("implement me")
 }
 
-func (p *pgStore) CheckBarcode(barcode string) (bool, error) {
+func (p *PgStore) CheckBarcode(barcode string) (bool, error) {
 	panic("implement me")
 }
 
-func (p *pgStore) getImageByBarcode(barcode string) (Image, error) {
+func (p *PgStore) getImgByBarcode(barcode string) (Image, error) {
 	panic("implement me")
 }

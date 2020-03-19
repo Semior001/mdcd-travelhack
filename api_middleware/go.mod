@@ -1,6 +1,6 @@
 module github.com/Semior001/mdcd-travelhack
 
-go 1.13
+go 1.14
 
 require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
