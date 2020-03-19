@@ -1,18 +1,14 @@
 package user
 
 import (
-	"log"
-	"os"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/go-pg/pg/v9"
-
 	"github.com/pkg/errors"
-
 	"golang.org/x/crypto/bcrypt"
 )
+
+//go:generate mockery -inpkg -name Store -case snake
 
 const (
 	// PrivilegeInviteUsers privilege to invite users via link
@@ -24,8 +20,10 @@ const (
 )
 
 // User describes basic user
+//
+// Note: if privilege is not present as key in the map, golang will return false in such case
 type User struct {
-	ID         uint64
+	ID         int
 	Email      string          `pg:",unique"`
 	Password   string          `json:"-"`
 	Privileges map[string]bool // in format "privilege: given"
@@ -35,83 +33,74 @@ type User struct {
 
 // Store defines an interface to put and load users from the database
 type Store interface {
-	Migrate(force bool) error
-	putUser(user User) (id uint64, err error)
-	UpdateUser(user User) (err error)
-	GetUser(id uint64) (user *User, err error)
-	GetUsers() (users []User, err error)
-	GetUserCredentials(email string) (user *User, err error)
-	getBasicUserInfo(id uint64) (user *User, err error)
-	DeleteUser(id uint64) (err error)
+	put(user User) (id int, err error)
+	Update(user User) (err error)
+	Get(id int) (user User, err error)
+	List() (users []User, err error)
+	GetByEmail(email string) (user User, err error)
+	GetAuthData(id int) (email string, pwdHash string, privs map[string]bool, err error)
+	Delete(id int) (err error)
 }
 
 // Service provides methods for operating, processing and storing users
 type Service struct {
+	BCryptCost int
 	Store
-
-	BcryptCost int
 }
 
 // ServiceOpts defines options to create connection with storage
+//
+// ConnStr should be provided in format: dbdriver://uname:password@address:port/dbname?[param1=][&param2=][...etc]
 type ServiceOpts struct {
-	Driver      string
-	User        string
-	Password    string
-	Source      string
-	LoggerFlags int
-	BcryptCost  int
+	ConnStr    string
+	BCryptCost int
 }
 
 // NewService creates a new user service with specified parameters and returns it
 func NewService(opts ServiceOpts) (*Service, error) {
+	driverEndIdx := strings.Index(opts.ConnStr, "://")
+	driver := opts.ConnStr[0:driverEndIdx]
+
 	var db Store
 	var err error
 
-	switch opts.Driver {
+	switch driver {
 	case "postgres":
-		db, err = NewPgStorage(pg.Options{
-			User:     opts.User,
-			Password: opts.Password,
-			Database: strings.Split(opts.Source, "@")[0],
-			Addr:     strings.Split(opts.Source, "@")[1], // todo check that source satisfies pattern
-		}, log.New(os.Stdout, "pgstorage", opts.LoggerFlags))
+		db, err = NewPgStore(opts.ConnStr)
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to initialize user Store with connstr %s", opts.ConnStr)
 	}
+
 	return &Service{
 		Store:      db,
-		BcryptCost: opts.BcryptCost,
+		BCryptCost: opts.BCryptCost,
 	}, nil
 }
 
-// CheckUserCredentials function matches given user password with the stored hash
+// CheckUserCredentials matches given user password with the stored (by email) hash
 func (s *Service) CheckUserCredentials(email string, password string) (bool, error) {
-	user, err := s.GetUserCredentials(email)
+	user, err := s.GetByEmail(email)
 	if err != nil {
-		return false, errors.Wrapf(err, "failed to validate user")
+		return false, errors.Wrapf(err, "email %s not listed in db", email)
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+
+	if err == bcrypt.ErrMismatchedHashAndPassword {
+		return false, nil
+	}
+
 	return err == nil, err
 }
 
-// PutUser is a wrapper for db implementation, that hashes user's password
-func (s *Service) PutUser(user User) (uint64, error) {
+// HashPwdAndPut hashes user password before saving it to the database
+func (s *Service) HashPwdAndPut(user User) (int, error) {
 	// hashing password
-	bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), s.BcryptCost)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), s.BCryptCost)
 	if err != nil {
 		return 0, errors.Wrapf(err, "unable to hash given password")
 	}
 	user.Password = string(bytes)
-	return s.putUser(user)
-}
-
-// GetBasicUserInfo returns email, password (hashed), and privileges of given user ID
-func (s *Service) GetBasicUserInfo(id string) (*User, error) {
-	idInt, err := strconv.Atoi(id)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to convert id string to int")
-	}
-	return s.getBasicUserInfo(uint64(idInt))
+	return s.put(user)
 }

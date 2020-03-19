@@ -2,43 +2,31 @@ package main
 
 import (
 	"fmt"
+	"github.com/Semior001/mdcd-travelhack/app/cmd"
 	"log"
 	"os"
-
-	"github.com/Semior001/mdcd-travelhack/app/cmd"
 
 	"github.com/hashicorp/logutils"
 	"github.com/jessevdk/go-flags"
 )
 
-// Options struct defines all cli commands and flags
-type Options struct {
-	ServeCmd         cmd.ServeCommand     `command:"serve"`
-	MigrateDbCmd     cmd.MigrateDbCommand `command:"migrate"`
-	RegisterAdminCmd cmd.RegisterAdmin    `command:"register_admin"`
+const revision = "unknown"
 
-	Dbg bool `long:"dbg" env:"DEBUG" description:"debug mode"`
+type Opts struct {
+	ServerCmd cmd.ServerCmd `command:"server"`
+	Dbg       bool          `long:"dbg" env:"DEBUG" description:"debug mode"`
 }
-
-const appName = "mdcd_api_middleware"
-const appAuthor = "semior"
-const version = "unknown"
 
 var logFlags int = log.Ldate | log.Ltime
 
 func main() {
-	fmt.Printf("%s version: %s\n", appName, version)
-	var opts Options
+	fmt.Printf("mdcd_api_middleware revision %s", revision)
+
+	var opts Opts
 	p := flags.NewParser(&opts, flags.Default)
 
 	p.CommandHandler = func(command flags.Commander, args []string) error {
 		setupLog(opts.Dbg)
-		command.(cmd.CommonCommander).SetCommonOptions(cmd.CommonOptions{
-			AppName:     appName,
-			AppAuthor:   appAuthor,
-			Version:     version,
-			LoggerFlags: logFlags,
-		})
 		err := command.Execute(args)
 		if err != nil {
 			log.Printf("[ERROR] failed to execute command %+v", err)
@@ -69,6 +57,5 @@ func setupLog(dbg bool) {
 	}
 
 	log.SetFlags(logFlags)
-
 	log.SetOutput(filter)
 }

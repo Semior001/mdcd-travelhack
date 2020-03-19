@@ -1,94 +1,123 @@
 package user
 
 import (
-	"log"
-
+	"encoding/json"
+	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
-
-	"github.com/Semior001/mdcd-travelhack/app/utils"
-	"github.com/go-pg/pg/v9"
+	"log"
+	"time"
 )
 
-// PgStorage implements all storage methods, defined in Store
-type PgStorage struct {
-	db *pg.DB
+// PgStore is a Store interface implementation over PostgresSQL
+type PgStore struct {
+	ConnStr string
+
+	connPool *pgx.ConnPool
 }
 
-// NewPgStorage creates new postgres storage to work with User models
-func NewPgStorage(options pg.Options, logger *log.Logger) (*PgStorage, error) {
-	db := pg.Connect(&options)
-	pg.SetLogger(logger)
-	return &PgStorage{
-		db: db,
+// NewPgStore creates a new connection pool to postgres storage with specified parameters
+//
+// connStr should be provided in format: dbdriver://uname:password@address:port/dbname?[param1=][&param2=][...etc]
+func NewPgStore(connStr string) (*PgStore, error) {
+	connConf, err := pgx.ParseConnectionString(connStr)
+
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse pg user Store with connstr %s", connStr)
+	}
+
+	p, err := pgx.NewConnPool(pgx.ConnPoolConfig{
+		ConnConfig:     connConf,
+		MaxConnections: 5,
+		AfterConnect: func(conn *pgx.Conn) error {
+			// todo no-op yet
+			return nil
+		},
+		AcquireTimeout: time.Minute,
+	})
+
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to initialize pg user Store with connstr %s", connStr)
+	}
+
+	return &PgStore{
+		ConnStr:  connStr,
+		connPool: p,
 	}, nil
 }
 
-// Migrate forms all tables and views in the database to make them available for use
-func (s *PgStorage) Migrate(force bool) error {
-	log.Printf("[DEBUG] started users storage migration")
-	if err := utils.CreateSchemas(s.db, force,
-		(*User)(nil),
-	); err != nil {
-		return errors.Wrapf(err, "there are some errors during the migration")
+// put saves user in postgres Store
+func (p *PgStore) put(user User) (int, error) {
+	tx, err := p.connPool.Begin()
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to start insert transaction into pg users store")
 	}
-	return nil
+
+	defer func() {
+		errNested := tx.Rollback()
+		if errNested != nil && errNested != pgx.ErrTxClosed {
+			log.Printf("[ERROR] failed to rollback the transaction (put in pgUsr): %+v", err)
+		}
+	}()
+
+	privsMarshalled, err := json.Marshal(user.Privileges)
+
+	if err != nil {
+		return 0, errors.Wrapf(err, "failed to insert user: failed to marshal privileges")
+	}
+
+	row := tx.QueryRow("INSERT INTO "+
+		"users(email, password, privileges, created_at, updated_at) "+
+		"VALUES ($1, $2, $3, $4, $5) "+
+		"RETURNING id",
+		user.Email,
+		user.Password,
+		privsMarshalled,
+		time.Now(),
+		time.Now(),
+	)
+
+	var id int
+	err = row.Scan(&id)
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to scan user ID while inserting")
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to commit transaction user ID while inserting")
+	}
+
+	return id, nil
 }
 
-// PutUser user into storage, if there is error, id will be 0
-func (s *PgStorage) putUser(user User) (id uint64, err error) {
-	if err := s.db.Insert(&user); err != nil {
-		return 0, err
-	}
-	return user.ID, nil
+// Get returns user by its ID, if user is present
+func (p *PgStore) Get(id int) (User, error) {
+	panic("implement me")
 }
 
-// UpdateUser user in the postgres storage
-func (s *PgStorage) UpdateUser(user User) (err error) {
-	if err := s.db.Update(&user); err != nil {
-		return err
-	}
-	return nil
+// List returns the list of all user stored in the database
+func (p *PgStore) List() ([]User, error) {
+	panic("implement me")
 }
 
-// GetUser user by id from the postgres storage
-func (s *PgStorage) GetUser(id uint64) (*User, error) {
-	user := User{ID: id}
-	if err := s.db.Select(&user); err != nil {
-		return nil, err
-	}
-	return &user, nil
+// GetByEmail returns user's data by its email
+func (p *PgStore) GetByEmail(email string) (User, error) {
+	panic("implement me")
 }
 
-// GetUserCredentials returns basic email and password information about the user
-func (s *PgStorage) GetUserCredentials(email string) (*User, error) {
-	user := User{}
-	if err := s.db.Model(&user).Where("email = ?", email).Column("id", "email", "password").Select(&user); err != nil {
-		return nil, err
-	}
-	return &user, nil
+// GetAuthData provides basic auth information about user, such as email, hashed password and
+// its privileges in format map[privilege]given
+func (p *PgStore) GetAuthData(id int) (string, string, map[string]bool, error) {
+	panic("implement me")
 }
 
-// GetBasicUserInfo returns information about user's privileges
-func (s *PgStorage) getBasicUserInfo(id uint64) (*User, error) {
-	user := User{ID: id}
-	if err := s.db.Model(&user).Column("is_admin", "email", "password", "privileges").Select(&user); err != nil {
-		return nil, err
-	}
-	return &user, nil
+// Delete deletes user, given by its ID, from the postgres database
+func (p *PgStore) Delete(id int) error {
+	panic("implement me")
 }
 
-func (s *PgStorage) GetUsers() ([]User, error) {
-	var users []User
-	if err := s.db.Model(&users).Select(&users); err != nil {
-		return nil, err
-	}
-	return users, nil
-}
-
-// DeleteUser user by id from the postgres storage
-func (s *PgStorage) DeleteUser(id uint64) error {
-	if err := s.db.Delete(&User{ID: id}); err != nil {
-		return err
-	}
-	return nil
+// Update updates user information stored in the database (everything except ID, email and password)
+func (p *PgStore) Update(user User) error {
+	panic("implement me")
 }
