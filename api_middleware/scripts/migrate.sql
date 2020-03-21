@@ -16,10 +16,10 @@ CREATE SEQUENCE users_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 
 CREATE TABLE "users" (
                          "id" integer DEFAULT nextval('users_id_seq') NOT NULL,
                          "email" text NOT NULL,
-                         "password" text,
-                         "privileges" jsonb,
-                         "created_at" timestamptz,
-                         "updated_at" timestamptz,
+                         "password" text NOT NULL,
+                         "privileges" jsonb DEFAULT '{}'::jsonb,
+                         "created_at" timestamptz DEFAULT NOW(),
+                         "updated_at" timestamptz DEFAULT NOW(),
                          CONSTRAINT "users_email_key" UNIQUE ("email"),
                          CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
@@ -31,8 +31,8 @@ CREATE TABLE "images" (
     "img_type_id" integer,
     "local_filename" text,
     "user_id" bigint,
-    "created_at" timestamptz,
-    "updated_at" timestamptz,
+    "created_at" timestamptz DEFAULT NOW(),
+    "updated_at" timestamptz DEFAULT NOW(),
     CONSTRAINT "images_bar_code_key" UNIQUE ("bar_code"),
     CONSTRAINT "images_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "images_img_type_id_fkey" FOREIGN KEY (img_type_id) REFERENCES img_types(id) NOT DEFERRABLE,

@@ -624,12 +624,11 @@ func preparePgStore(t *testing.T) *PgStore {
 
 	connConf, err := pgx.ParseConnectionString(connStr)
 
-	const toMilliseconds = 1e6
 	connPool, err := pgx.NewConnPool(pgx.ConnPoolConfig{
 		ConnConfig:     connConf,
 		MaxConnections: 2,
 		AfterConnect:   nil,
-		AcquireTimeout: 60 * toMilliseconds,
+		AcquireTimeout: 60 * time.Millisecond,
 	})
 	require.NoError(t, err)
 

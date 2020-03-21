@@ -1,9 +1,7 @@
 package user
 
 import (
-	"encoding/json"
 	"github.com/jackc/pgx"
-	"github.com/jackc/pgx/pgtype"
 	"github.com/pkg/errors"
 	"log"
 	"time"
@@ -60,19 +58,13 @@ func (p *PgStore) put(user User) (int, error) {
 		}
 	}()
 
-	privsMarshalled, err := json.Marshal(user.Privileges)
-
-	if err != nil {
-		return 0, errors.Wrapf(err, "failed to insert user: failed to marshal privileges")
-	}
-
 	row := tx.QueryRow("INSERT INTO "+
 		"users(email, password, privileges, created_at, updated_at) "+
 		"VALUES ($1, $2, $3, $4, $5) "+
 		"RETURNING id",
 		user.Email,
 		user.Password,
-		privsMarshalled,
+		user.Privileges,
 		time.Now(),
 		time.Now(),
 	)
@@ -94,33 +86,14 @@ func (p *PgStore) put(user User) (int, error) {
 
 // Get returns user by its ID, if user is present
 func (p *PgStore) Get(id int) (User, error) {
-	var email pgtype.Text
-	var password pgtype.Text
-	var privileges pgtype.JSONB
-	var privsUnmarshalled map[string]bool
-	var createdAt pgtype.Timestamptz
-	var updatedAt pgtype.Timestamptz
+	user := User{ID: id}
 
 	row := p.connPool.QueryRow("SELECT email, password, privileges, created_at, updated_at "+
 		"FROM users WHERE id = $1", id)
 
-	err := row.Scan(&email, &password, &privileges, &createdAt, &updatedAt)
+	err := row.Scan(&user.Email, &user.Password, &user.Privileges, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
-		return User{}, errors.Wrap(err, "failed to scan user in Get method")
-	}
-
-	err = json.Unmarshal(privileges.Bytes, &privsUnmarshalled)
-	if err != nil {
-		return User{}, errors.Wrap(err, "failed to get user: failed to unmarshal user privileges")
-	}
-
-	user := User{
-		ID:         id,
-		Email:      email.String,
-		Password:   password.String,
-		Privileges: privsUnmarshalled,
-		CreatedAt:  createdAt.Time,
-		UpdatedAt:  updatedAt.Time,
+		return User{ID: id}, errors.Wrap(err, "failed to scan user in Get method")
 	}
 
 	return user, nil
@@ -138,31 +111,11 @@ func (p *PgStore) List() ([]User, error) {
 	var users []User
 
 	for rows.Next() {
-		var id int
-		var email pgtype.Text
-		var password pgtype.Text
-		var privileges pgtype.JSONB
-		var privsUnmarshalled map[string]bool
-		var createdAt pgtype.Timestamptz
-		var updatedAt pgtype.Timestamptz
+		user := User{}
 
-		err := rows.Scan(&id, &email, &password, &privileges, &createdAt, &updatedAt)
+		err := rows.Scan(&user.ID, &user.Email, &user.Password, &user.Privileges, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return []User{}, errors.Wrap(err, "failed to scan one of users")
-		}
-
-		err = json.Unmarshal(privileges.Bytes, &privsUnmarshalled)
-		if err != nil {
-			return []User{}, errors.Wrap(err, "failed to list all users: failed to unmarshal user privileges")
-		}
-
-		user := User{
-			ID:         id,
-			Email:      email.String,
-			Password:   password.String,
-			Privileges: privsUnmarshalled,
-			CreatedAt:  createdAt.Time,
-			UpdatedAt:  updatedAt.Time,
 		}
 
 		users = append(users, user)
@@ -177,33 +130,14 @@ func (p *PgStore) List() ([]User, error) {
 
 // GetByEmail returns user's data by its email
 func (p *PgStore) GetByEmail(email string) (User, error) {
-	var id int
-	var password pgtype.Text
-	var privileges pgtype.JSONB
-	var privsUnmarshalled map[string]bool
-	var createdAt pgtype.Timestamptz
-	var updatedAt pgtype.Timestamptz
+	user := User{Email: email}
 
 	row := p.connPool.QueryRow("SELECT id, password, privileges, created_at, updated_at "+
 		"FROM users WHERE email = $1", email)
 
-	err := row.Scan(&id, &password, &privileges, &createdAt, &updatedAt)
+	err := row.Scan(&user.ID, &user.Password, &user.Privileges, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return User{}, errors.Wrap(err, "failed to scan user in GetByEmail")
-	}
-
-	err = json.Unmarshal(privileges.Bytes, &privsUnmarshalled)
-	if err != nil {
-		return User{}, errors.Wrap(err, "failed to unmarshal user privileges in GetByEmail")
-	}
-
-	user := User{
-		ID:         id,
-		Email:      email,
-		Password:   password.String,
-		Privileges: privsUnmarshalled,
-		CreatedAt:  createdAt.Time,
-		UpdatedAt:  updatedAt.Time,
 	}
 
 	return user, nil
@@ -212,25 +146,17 @@ func (p *PgStore) GetByEmail(email string) (User, error) {
 // GetAuthData provides basic auth information about user, such as email, hashed password and
 // its privileges in format map[privilege]given
 func (p *PgStore) GetAuthData(id int) (string, string, map[string]bool, error) {
-	var email pgtype.Text
-	var password pgtype.Text
-	var privileges pgtype.JSONB
-	var privsUnmarshalled map[string]bool
+	user := User{}
 
 	row := p.connPool.QueryRow("SELECT email, password, privileges "+
 		"FROM users WHERE id = $1", id)
 
-	err := row.Scan(&email, &password, &privileges)
+	err := row.Scan(&user.Email, &user.Password, &user.Privileges)
 	if err != nil {
 		return "", "", nil, errors.Wrap(err, "failed to scan user in GetAuthData")
 	}
 
-	err = json.Unmarshal(privileges.Bytes, &privsUnmarshalled)
-	if err != nil {
-		return "", "", nil, errors.Wrap(err, "failed to unmarshal user privileges in GetAuthData")
-	}
-
-	return email.String, password.String, privsUnmarshalled, nil
+	return user.Email, user.Password, user.Privileges, nil
 }
 
 // Delete deletes user, given by its ID, from the postgres database
@@ -264,16 +190,10 @@ func (p *PgStore) Update(user User) error {
 		}
 	}()
 
-	privsMarshalled, err := json.Marshal(user.Privileges)
-
-	if err != nil {
-		return errors.Wrapf(err, "failed to update user: failed to marshal privileges")
-	}
-
 	commandTag, err := p.connPool.Exec("UPDATE users SET "+
 		"privileges = $1, updated_at = $2 "+
 		"WHERE id = $3",
-		privsMarshalled,
+		user.Privileges,
 		time.Now(),
 		user.ID)
 
