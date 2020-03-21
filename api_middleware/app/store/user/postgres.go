@@ -170,7 +170,7 @@ func (p *PgStore) Delete(id int) error {
 	}
 
 	if commandTag.RowsAffected() != 1 {
-		log.Printf("[DEBUG] didn't found record to delete: %+v", err)
+		log.Printf("[DEBUG] didn't found record to delete")
 	}
 
 	return nil
@@ -202,7 +202,7 @@ func (p *PgStore) Update(user User) error {
 	}
 
 	if commandTag.RowsAffected() != 1 {
-		log.Printf("[DEBUG] didn't found record to update: %+v", err)
+		log.Printf("[DEBUG] didn't found record to update")
 	}
 
 	err = tx.Commit()
