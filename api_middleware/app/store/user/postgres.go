@@ -93,7 +93,7 @@ func (p *PgStore) Get(id int) (User, error) {
 
 	err := row.Scan(&user.Email, &user.Password, &user.Privileges, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
-		return User{ID: id}, errors.Wrap(err, "failed to scan user in Get method")
+		return User{}, errors.Wrapf(err, "failed to scan user (id = %d) in Get method", id)
 	}
 
 	return user, nil
@@ -103,7 +103,7 @@ func (p *PgStore) Get(id int) (User, error) {
 func (p *PgStore) List() ([]User, error) {
 	rows, err := p.connPool.Query("SELECT * FROM users")
 	if err != nil {
-		return []User{}, errors.Wrap(err, "failed to select all users")
+		return nil, errors.Wrap(err, "failed to select all users")
 	}
 
 	defer rows.Close()
@@ -115,14 +115,14 @@ func (p *PgStore) List() ([]User, error) {
 
 		err := rows.Scan(&user.ID, &user.Email, &user.Password, &user.Privileges, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
-			return []User{}, errors.Wrap(err, "failed to scan one of users")
+			return nil, errors.Wrap(err, "failed to scan one of users")
 		}
 
 		users = append(users, user)
 	}
 
 	if rows.Err() != nil {
-		return []User{}, errors.Wrap(err, "failed to process all rows in List method")
+		return nil, errors.Wrap(err, "failed to process all rows in List method")
 	}
 
 	return users, nil
@@ -137,7 +137,7 @@ func (p *PgStore) GetByEmail(email string) (User, error) {
 
 	err := row.Scan(&user.ID, &user.Password, &user.Privileges, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
-		return User{}, errors.Wrap(err, "failed to scan user in GetByEmail")
+		return User{}, errors.Wrapf(err, "failed to scan user (email = %s) in GetByEmail", email)
 	}
 
 	return user, nil
@@ -170,7 +170,7 @@ func (p *PgStore) Delete(id int) error {
 	}
 
 	if commandTag.RowsAffected() != 1 {
-		log.Printf("[ERROR] not found record to delete (Delete in pgUsr): %+v", err)
+		log.Printf("[DEBUG] didn't found record to delete: %+v", err)
 	}
 
 	return nil
@@ -202,7 +202,7 @@ func (p *PgStore) Update(user User) error {
 	}
 
 	if commandTag.RowsAffected() != 1 {
-		log.Printf("[ERROR] not found record to update (Update in pgUsr): %+v", err)
+		log.Printf("[DEBUG] didn't found record to update: %+v", err)
 	}
 
 	err = tx.Commit()
