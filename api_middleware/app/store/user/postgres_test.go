@@ -204,7 +204,7 @@ func TestPgStore_Get(t *testing.T) {
 	assert.Equal(t, shouldBe.Email, usr.Email)
 	assert.Equal(t, shouldBe.Password, usr.Password)
 
-	ok := reflect.DeepEqual(shouldBe.Privileges, usr.Password)
+	ok := reflect.DeepEqual(shouldBe.Privileges, usr.Privileges)
 	assert.True(t, ok)
 }
 
@@ -521,6 +521,7 @@ func TestPgStore_Update(t *testing.T) {
 	}
 
 	privsMarshalled, err := json.Marshal(user.Privileges)
+	require.NoError(t, err)
 
 	tx, err := srv.connPool.Begin()
 	require.NoError(t, err)
@@ -539,6 +540,7 @@ func TestPgStore_Update(t *testing.T) {
 	var id int
 	err = row.Scan(&id)
 	require.NoError(t, err)
+	user.ID = id
 
 	err = tx.Commit()
 	require.NoError(t, err)
@@ -622,11 +624,12 @@ func preparePgStore(t *testing.T) *PgStore {
 
 	connConf, err := pgx.ParseConnectionString(connStr)
 
+	const toMilliseconds = 1e6
 	connPool, err := pgx.NewConnPool(pgx.ConnPoolConfig{
 		ConnConfig:     connConf,
-		MaxConnections: 1,
+		MaxConnections: 2,
 		AfterConnect:   nil,
-		AcquireTimeout: 60,
+		AcquireTimeout: 60 * toMilliseconds,
 	})
 	require.NoError(t, err)
 
