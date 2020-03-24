@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestPgStore_CheckBarcode(t *testing.T) {
@@ -15,7 +16,8 @@ func TestPgStore_CheckBarcode(t *testing.T) {
 	tx, err := srv.connPool.Begin()
 	require.NoError(t, err)
 
-	_, err = tx.Exec(`INSERT INTO images(barcode) VALUES ("foobarblah")`)
+	_, err = tx.Exec("INSERT INTO images(bar_code, img_type, mime, local_filename) "+
+		"VALUES ($1, $2, $3, $4)", "foobarblah", ImgTypeBackground, "png", "file.png")
 	require.NoError(t, err)
 
 	err = tx.Commit()
@@ -64,12 +66,6 @@ func TestPgStore_GetBackgroundIds(t *testing.T) {
 			LocalFilename: "gopher.png",
 		},
 		{
-			Barcode:       "blah1",
-			ImgType:       ImgTypeDerived,
-			Mime:          "png",
-			LocalFilename: "gopher.png",
-		},
-		{
 			Barcode:       "blah6",
 			ImgType:       ImgTypeDerived,
 			Mime:          "png",
@@ -99,7 +95,7 @@ func TestPgStore_GetBackgroundIds(t *testing.T) {
 		tx, err := srv.connPool.Begin()
 		require.NoError(t, err)
 
-		row := tx.QueryRow("INSERT INTO images(barcode, img_type, mime, local_filename) "+
+		row := tx.QueryRow("INSERT INTO images(bar_code, img_type, mime, local_filename) "+
 			"VALUES ($1, $2, $3, $4) "+
 			"RETURNING id",
 			imgs[i].Barcode,
@@ -110,6 +106,9 @@ func TestPgStore_GetBackgroundIds(t *testing.T) {
 
 		err = row.Scan(&imgs[i].ID)
 		require.NoError(t, err, "failed to scan inserting img id")
+
+		err = tx.Commit()
+		require.NoError(t, err)
 	}
 
 	imgIds, err := srv.GetBackgroundIds()
@@ -126,7 +125,7 @@ func TestPgStore_getImgByBarcode(t *testing.T) {
 	tx, err := srv.connPool.Begin()
 	require.NoError(t, err)
 
-	row := tx.QueryRow("INSERT INTO images(barcode, img_type, mime, local_filename) "+
+	row := tx.QueryRow("INSERT INTO images(bar_code, img_type, mime, local_filename) "+
 		"VALUES ($1, $2, $3, $4) "+
 		"RETURNING id",
 		"foobarblah",
@@ -162,7 +161,7 @@ func TestPgStore_putImage(t *testing.T) {
 	id, err := srv.putImage(img)
 	require.NoError(t, err)
 
-	row := srv.connPool.QueryRow("SELECT barcode, img_type, mime, local_filename "+
+	row := srv.connPool.QueryRow("SELECT bar_code, img_type, mime, local_filename "+
 		"FROM images WHERE id = $1", id)
 
 	var bc, imgtype, mime, localfname string
@@ -210,12 +209,6 @@ func TestPgStore_getImage(t *testing.T) {
 			LocalFilename: "gopher.png",
 		},
 		{
-			Barcode:       "blah1",
-			ImgType:       ImgTypeDerived,
-			Mime:          "png",
-			LocalFilename: "gopher.png",
-		},
-		{
 			Barcode:       "blah6",
 			ImgType:       ImgTypeDerived,
 			Mime:          "png",
@@ -245,7 +238,7 @@ func TestPgStore_getImage(t *testing.T) {
 		tx, err := srv.connPool.Begin()
 		require.NoError(t, err)
 
-		row := tx.QueryRow("INSERT INTO images(barcode, img_type, mime, local_filename) "+
+		row := tx.QueryRow("INSERT INTO images(bar_code, img_type, mime, local_filename) "+
 			"VALUES ($1, $2, $3, $4) "+
 			"RETURNING id",
 			imgs[i].Barcode,
@@ -256,6 +249,9 @@ func TestPgStore_getImage(t *testing.T) {
 
 		err = row.Scan(&imgs[i].ID)
 		require.NoError(t, err, "failed to scan inserting img id")
+
+		err = tx.Commit()
+		require.NoError(t, err)
 	}
 
 	img, err := srv.getImage(imgs[3].ID)
@@ -274,9 +270,9 @@ func preparePgStore(t *testing.T) *PgStore {
 
 	connPool, err := pgx.NewConnPool(pgx.ConnPoolConfig{
 		ConnConfig:     connConf,
-		MaxConnections: 1,
+		MaxConnections: 2,
 		AfterConnect:   nil,
-		AcquireTimeout: 60,
+		AcquireTimeout: 60 * time.Millisecond,
 	})
 	require.NoError(t, err)
 

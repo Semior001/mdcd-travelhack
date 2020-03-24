@@ -88,10 +88,9 @@ func (p *PgStore) put(user User) (int, error) {
 func (p *PgStore) Get(id int) (User, error) {
 	user := User{ID: id}
 
-	row := p.connPool.QueryRow("SELECT email, password, privileges, created_at, updated_at "+
-		"FROM users WHERE id = $1", id)
+	row := p.connPool.QueryRow("SELECT * FROM users WHERE id = $1", id)
 
-	err := row.Scan(&user.Email, &user.Password, &user.Privileges, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(nil, &user.Email, &user.Password, &user.Privileges, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return User{}, errors.Wrapf(err, "failed to scan user (id = %d) in Get method", id)
 	}
@@ -122,7 +121,7 @@ func (p *PgStore) List() ([]User, error) {
 	}
 
 	if rows.Err() != nil {
-		return nil, errors.Wrap(err, "failed to process all rows in List method")
+		return nil, errors.Wrap(rows.Err(), "failed to process all rows in List method")
 	}
 
 	return users, nil
@@ -132,10 +131,9 @@ func (p *PgStore) List() ([]User, error) {
 func (p *PgStore) GetByEmail(email string) (User, error) {
 	user := User{Email: email}
 
-	row := p.connPool.QueryRow("SELECT id, password, privileges, created_at, updated_at "+
-		"FROM users WHERE email = $1", email)
+	row := p.connPool.QueryRow("SELECT * FROM users WHERE email = $1", email)
 
-	err := row.Scan(&user.ID, &user.Password, &user.Privileges, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(&user.ID, nil, &user.Password, &user.Privileges, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return User{}, errors.Wrapf(err, "failed to scan user (email = %s) in GetByEmail", email)
 	}

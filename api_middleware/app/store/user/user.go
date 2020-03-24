@@ -24,7 +24,7 @@ const (
 // Note: if privilege is not present as key in the map, golang will return false in such case
 type User struct {
 	ID         int
-	Email      string          `pg:",unique"`
+	Email      string
 	Password   string          `json:"-"`
 	Privileges map[string]bool // in format "privilege: given"
 	CreatedAt  time.Time
