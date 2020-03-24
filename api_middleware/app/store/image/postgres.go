@@ -82,9 +82,11 @@ func (p *PgStore) putImage(image Image) (int, error) {
 func (p *PgStore) getImage(id int) (Image, error) {
 	image := Image{ID: id}
 
-	row := p.connPool.QueryRow("SELECT * FROM images WHERE id = $1", id)
+	row := p.connPool.QueryRow("SELECT bar_code, mime, "+
+		"img_type, local_filename, user_id, created_at, updated_at "+
+		"FROM images WHERE id = $1", id)
 
-	err := row.Scan(nil, &image.Barcode, &image.Mime, &image.ImgType,
+	err := row.Scan(&image.Barcode, &image.Mime, &image.ImgType,
 		&image.LocalFilename, &image.UserID, &image.CreatedAt, &image.UpdatedAt)
 	if err != nil {
 		return Image{}, errors.Wrapf(err, "failed to scan user with id = %d", id)
@@ -99,7 +101,7 @@ func (p *PgStore) GetBackgroundIds() ([]int, error) {
 
 	rows, err := p.connPool.Query("SELECT id FROM images WHERE img_type = $1", ImgTypeBackground)
 	if err != nil {
-		return nil, errors.Wrap(err, "")
+		return nil, errors.Wrap(err, "failed to select all background ids")
 	}
 
 	defer rows.Close()
@@ -143,7 +145,9 @@ func (p *PgStore) CheckBarcode(barcode string) (bool, error) {
 func (p *PgStore) getImgByBarcode(barcode string) (Image, error) {
 	image := Image{Barcode: barcode}
 
-	row := p.connPool.QueryRow("SELECT * FROM images WHERE bar_code = $1", barcode)
+	row := p.connPool.QueryRow("SELECT id, mime, img_type, "+
+		"local_filename, user_id, created_at, updated_at "+
+		"FROM images WHERE bar_code = $1", barcode)
 
 	err := row.Scan(&image.ID, nil, &image.Mime, &image.ImgType,
 		&image.LocalFilename, &image.UserID, &image.CreatedAt, &image.UpdatedAt)
