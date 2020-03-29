@@ -43,7 +43,7 @@ func NewPgStore(connStr string) (*PgStore, error) {
 }
 
 // putImage stores image in database and returns its id
-func (p *PgStore) putImage(image Image) (int, error) {
+func (p *PgStore) putImage(image Image) (uint64, error) {
 	tx, err := p.connPool.Begin()
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to start insert transaction into pg image store")
@@ -63,7 +63,7 @@ func (p *PgStore) putImage(image Image) (int, error) {
 		image.Barcode, image.Mime, image.ImgType, image.LocalFilename, image.UserID,
 		time.Now(), time.Now())
 
-	var id int
+	var id uint64
 	err = row.Scan(&id)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to scan image ID while inserting")
@@ -79,7 +79,7 @@ func (p *PgStore) putImage(image Image) (int, error) {
 }
 
 // getImage returns image by its id
-func (p *PgStore) getImage(id int) (Image, error) {
+func (p *PgStore) getImage(id uint64) (Image, error) {
 	image := Image{ID: id}
 
 	row := p.connPool.QueryRow("SELECT bar_code, mime, "+
@@ -96,8 +96,8 @@ func (p *PgStore) getImage(id int) (Image, error) {
 }
 
 // GetBackgroundIds returns slice with ids of all background images
-func (p *PgStore) GetBackgroundIds() ([]int, error) {
-	var ids []int
+func (p *PgStore) GetBackgroundIds() ([]uint64, error) {
+	var ids []uint64
 
 	rows, err := p.connPool.Query("SELECT id FROM images WHERE img_type = $1", ImgTypeBackground)
 	if err != nil {
@@ -107,7 +107,7 @@ func (p *PgStore) GetBackgroundIds() ([]int, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id int
+		var id uint64
 
 		err = rows.Scan(&id)
 		if err != nil {

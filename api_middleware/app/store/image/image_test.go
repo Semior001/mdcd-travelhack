@@ -101,13 +101,13 @@ func TestService_Save(t *testing.T) {
 			storedImg = img
 			return true
 		}),
-	).Return(1, nil)
+	).Return(uint64(1), nil)
 
 	srv := prepareLocalStore(t, store)
 
-	id, err := srv.Save(1, "foobarblah", ImgTypeBackground, gopherPNG())
+	id, err := srv.Save(1, "foobarblah", ImgTypeBackground, "image/jpeg", gopherPNG())
 	require.NoError(t, err)
-	assert.Equal(t, 1, id)
+	assert.Equal(t, uint64(1), id)
 
 	assert.FileExists(t, path.Join(srv.LocalStoragePath, storedImg.LocalFilename))
 }

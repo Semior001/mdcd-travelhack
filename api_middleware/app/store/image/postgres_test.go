@@ -114,7 +114,7 @@ func TestPgStore_GetBackgroundIds(t *testing.T) {
 	imgIds, err := srv.GetBackgroundIds()
 	require.NoError(t, err)
 
-	ok := reflect.DeepEqual([]int{imgs[3].ID, imgs[6].ID}, imgIds)
+	ok := reflect.DeepEqual([]uint64{imgs[3].ID, imgs[6].ID}, imgIds)
 	assert.True(t, ok)
 
 }

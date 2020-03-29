@@ -31,15 +31,15 @@ func (_m *MockStore) CheckBarcode(barcode string) (bool, error) {
 }
 
 // GetBackgroundIds provides a mock function with given fields:
-func (_m *MockStore) GetBackgroundIds() ([]int, error) {
+func (_m *MockStore) GetBackgroundIds() ([]uint64, error) {
 	ret := _m.Called()
 
-	var r0 []int
-	if rf, ok := ret.Get(0).(func() []int); ok {
+	var r0 []uint64
+	if rf, ok := ret.Get(0).(func() []uint64); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]int)
+			r0 = ret.Get(0).([]uint64)
 		}
 	}
 
@@ -54,18 +54,18 @@ func (_m *MockStore) GetBackgroundIds() ([]int, error) {
 }
 
 // getImage provides a mock function with given fields: id
-func (_m *MockStore) getImage(id int) (Image, error) {
+func (_m *MockStore) getImage(id uint64) (Image, error) {
 	ret := _m.Called(id)
 
 	var r0 Image
-	if rf, ok := ret.Get(0).(func(int) Image); ok {
+	if rf, ok := ret.Get(0).(func(uint64) Image); ok {
 		r0 = rf(id)
 	} else {
 		r0 = ret.Get(0).(Image)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
 		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
@@ -96,14 +96,14 @@ func (_m *MockStore) getImgByBarcode(barcode string) (Image, error) {
 }
 
 // putImage provides a mock function with given fields: imgMetaData
-func (_m *MockStore) putImage(imgMetaData Image) (int, error) {
+func (_m *MockStore) putImage(imgMetaData Image) (uint64, error) {
 	ret := _m.Called(imgMetaData)
 
-	var r0 int
-	if rf, ok := ret.Get(0).(func(Image) int); ok {
+	var r0 uint64
+	if rf, ok := ret.Get(0).(func(Image) uint64); ok {
 		r0 = rf(imgMetaData)
 	} else {
-		r0 = ret.Get(0).(int)
+		r0 = ret.Get(0).(uint64)
 	}
 
 	var r1 error
