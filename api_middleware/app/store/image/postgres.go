@@ -149,7 +149,7 @@ func (p *PgStore) getImgByBarcode(barcode string) (Image, error) {
 		"local_filename, user_id, created_at, updated_at "+
 		"FROM images WHERE bar_code = $1", barcode)
 
-	err := row.Scan(&image.ID, nil, &image.Mime, &image.ImgType,
+	err := row.Scan(&image.ID, &image.Mime, &image.ImgType,
 		&image.LocalFilename, &image.UserID, &image.CreatedAt, &image.UpdatedAt)
 	if err != nil {
 		return Image{}, errors.Wrapf(err, "failed to scan user with barcode = %s", barcode)

@@ -17,7 +17,7 @@ func TestPgStore_CheckBarcode(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = tx.Exec("INSERT INTO images(bar_code, img_type, mime, local_filename) "+
-		"VALUES ($1, $2, $3, $4)", "foobarblah", ImgTypeBackground, "png", "file.png")
+		"VALUES ($1, $2, $3, $4)", "foobarblah", ImgTypeBackground, "image/png", "file.png")
 	require.NoError(t, err)
 
 	err = tx.Commit()
@@ -38,55 +38,55 @@ func TestPgStore_GetBackgroundIds(t *testing.T) {
 		{
 			Barcode:       "blah1",
 			ImgType:       ImgTypeSrc,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah2",
 			ImgType:       ImgTypeDerived,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah3",
 			ImgType:       ImgTypeDerived,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah4",
 			ImgType:       ImgTypeBackground,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah5",
 			ImgType:       ImgTypeDerived,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah6",
 			ImgType:       ImgTypeDerived,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah7",
 			ImgType:       ImgTypeBackground,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah8",
 			ImgType:       ImgTypeDerived,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah9",
 			ImgType:       ImgTypeCommitted,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 	}
@@ -130,10 +130,10 @@ func TestPgStore_getImgByBarcode(t *testing.T) {
 		"RETURNING id",
 		"foobarblah",
 		ImgTypeBackground,
-		"png",
+		"image/png",
 		"gopher.png",
 	)
-	var id int
+	var id uint64
 	err = row.Scan(&id)
 	require.NoError(t, err, "failed to scan inserting img id")
 
@@ -145,7 +145,7 @@ func TestPgStore_getImgByBarcode(t *testing.T) {
 
 	assert.Equal(t, id, img.ID)
 	assert.Equal(t, ImgTypeBackground, img.ImgType)
-	assert.Equal(t, "png", img.Mime)
+	assert.Equal(t, "image/png", img.Mime)
 	assert.Equal(t, "gopher.png", img.LocalFilename)
 }
 
@@ -154,7 +154,7 @@ func TestPgStore_putImage(t *testing.T) {
 	img := Image{
 		Barcode:       "foobarblahblah",
 		ImgType:       ImgTypeSrc,
-		Mime:          "png",
+		Mime:          "image/png",
 		LocalFilename: "gophergo.png",
 	}
 
@@ -181,55 +181,55 @@ func TestPgStore_getImage(t *testing.T) {
 		{
 			Barcode:       "blah1",
 			ImgType:       ImgTypeSrc,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah2",
 			ImgType:       ImgTypeDerived,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah3",
 			ImgType:       ImgTypeDerived,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah4",
 			ImgType:       ImgTypeBackground,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah5",
 			ImgType:       ImgTypeDerived,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah6",
 			ImgType:       ImgTypeDerived,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah7",
 			ImgType:       ImgTypeBackground,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah8",
 			ImgType:       ImgTypeDerived,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 		{
 			Barcode:       "blah9",
 			ImgType:       ImgTypeCommitted,
-			Mime:          "png",
+			Mime:          "image/png",
 			LocalFilename: "gopher.png",
 		},
 	}

@@ -44,7 +44,7 @@ func TestService_Load(t *testing.T) {
 		ID:            1,
 		Barcode:       "foobarblah",
 		ImgType:       ImgTypeCommitted,
-		Mime:          "png",
+		Mime:          "image/png",
 		LocalFilename: "gopher.png",
 	}, nil)
 	srv := prepareLocalStore(t, store)
@@ -54,10 +54,10 @@ func TestService_Load(t *testing.T) {
 	img, r, err := srv.Load(1)
 	require.NoError(t, err)
 
-	assert.Equal(t, 1, img.ID)
+	assert.Equal(t, uint64(1), img.ID)
 	assert.Equal(t, "foobarblah", img.Barcode)
 	assert.Equal(t, ImgTypeCommitted, img.ImgType)
-	assert.Equal(t, "png", img.Mime)
+	assert.Equal(t, "image/png", img.Mime)
 	assert.Equal(t, "gopher.png", img.LocalFilename)
 
 	bt, err := ioutil.ReadAll(r)
@@ -71,7 +71,7 @@ func TestService_GetImgByBarcode(t *testing.T) {
 		ID:            1,
 		Barcode:       "foobarblah",
 		ImgType:       ImgTypeCommitted,
-		Mime:          "png",
+		Mime:          "image/png",
 		LocalFilename: "gopher.png",
 	}, nil)
 	srv := prepareLocalStore(t, store)
@@ -81,10 +81,10 @@ func TestService_GetImgByBarcode(t *testing.T) {
 	img, r, err := srv.GetImgByBarcode("foobarblah")
 	require.NoError(t, err)
 
-	assert.Equal(t, 1, img.ID)
+	assert.Equal(t, uint64(1), img.ID)
 	assert.Equal(t, "foobarblah", img.Barcode)
 	assert.Equal(t, ImgTypeCommitted, img.ImgType)
-	assert.Equal(t, "png", img.Mime)
+	assert.Equal(t, "image/png", img.Mime)
 	assert.Equal(t, "gopher.png", img.LocalFilename)
 
 	bt, err := ioutil.ReadAll(r)
