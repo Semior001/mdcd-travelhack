@@ -1,6 +1,7 @@
 package image
 
 import (
+	"github.com/Semior001/mdcd-travelhack/app/store/user"
 	"github.com/jackc/pgx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -121,17 +122,19 @@ func TestPgStore_GetBackgroundIds(t *testing.T) {
 
 func TestPgStore_getImgByBarcode(t *testing.T) {
 	srv := preparePgStore(t)
+	users := createUsers(t, srv)
 
 	tx, err := srv.connPool.Begin()
 	require.NoError(t, err)
 
-	row := tx.QueryRow("INSERT INTO images(bar_code, img_type, mime, local_filename) "+
-		"VALUES ($1, $2, $3, $4) "+
+	row := tx.QueryRow("INSERT INTO images(bar_code, img_type, mime, local_filename, user_id) "+
+		"VALUES ($1, $2, $3, $4, $5) "+
 		"RETURNING id",
 		"foobarblah",
 		ImgTypeBackground,
 		"image/png",
 		"gopher.png",
+		users[1].ID,
 	)
 	var id uint64
 	err = row.Scan(&id)
@@ -147,6 +150,12 @@ func TestPgStore_getImgByBarcode(t *testing.T) {
 	assert.Equal(t, ImgTypeBackground, img.ImgType)
 	assert.Equal(t, "image/png", img.Mime)
 	assert.Equal(t, "gopher.png", img.LocalFilename)
+	assert.Equal(t, users[1].ID, img.UserID)
+	assert.Equal(t, users[1].Email, img.AddedBy.Email)
+	assert.Equal(t, users[1].Password, img.AddedBy.Password)
+
+	ok := reflect.DeepEqual(users[1].Privileges, img.AddedBy.Privileges)
+	assert.True(t, ok)
 }
 
 func TestPgStore_putImage(t *testing.T) {
@@ -177,60 +186,80 @@ func TestPgStore_putImage(t *testing.T) {
 
 func TestPgStore_getImage(t *testing.T) {
 	srv := preparePgStore(t)
+	users := createUsers(t, srv)
+
 	imgs := []Image{
 		{
 			Barcode:       "blah1",
 			ImgType:       ImgTypeSrc,
 			Mime:          "image/png",
 			LocalFilename: "gopher.png",
+			UserID:        users[0].ID,
+			AddedBy:       &users[0],
 		},
 		{
 			Barcode:       "blah2",
 			ImgType:       ImgTypeDerived,
 			Mime:          "image/png",
 			LocalFilename: "gopher.png",
+			UserID:        users[0].ID,
+			AddedBy:       &users[0],
 		},
 		{
 			Barcode:       "blah3",
 			ImgType:       ImgTypeDerived,
 			Mime:          "image/png",
 			LocalFilename: "gopher.png",
+			UserID:        users[0].ID,
+			AddedBy:       &users[0],
 		},
 		{
 			Barcode:       "blah4",
 			ImgType:       ImgTypeBackground,
 			Mime:          "image/png",
 			LocalFilename: "gopher.png",
+			UserID:        users[0].ID,
+			AddedBy:       &users[0],
 		},
 		{
 			Barcode:       "blah5",
 			ImgType:       ImgTypeDerived,
 			Mime:          "image/png",
 			LocalFilename: "gopher.png",
+			UserID:        users[0].ID,
+			AddedBy:       &users[0],
 		},
 		{
 			Barcode:       "blah6",
 			ImgType:       ImgTypeDerived,
 			Mime:          "image/png",
 			LocalFilename: "gopher.png",
+			UserID:        users[1].ID,
+			AddedBy:       &users[1],
 		},
 		{
 			Barcode:       "blah7",
 			ImgType:       ImgTypeBackground,
 			Mime:          "image/png",
 			LocalFilename: "gopher.png",
+			UserID:        users[1].ID,
+			AddedBy:       &users[1],
 		},
 		{
 			Barcode:       "blah8",
 			ImgType:       ImgTypeDerived,
 			Mime:          "image/png",
 			LocalFilename: "gopher.png",
+			UserID:        users[1].ID,
+			AddedBy:       &users[1],
 		},
 		{
 			Barcode:       "blah9",
 			ImgType:       ImgTypeCommitted,
 			Mime:          "image/png",
 			LocalFilename: "gopher.png",
+			UserID:        users[1].ID,
+			AddedBy:       &users[1],
 		},
 	}
 
@@ -238,13 +267,14 @@ func TestPgStore_getImage(t *testing.T) {
 		tx, err := srv.connPool.Begin()
 		require.NoError(t, err)
 
-		row := tx.QueryRow("INSERT INTO images(bar_code, img_type, mime, local_filename) "+
-			"VALUES ($1, $2, $3, $4) "+
+		row := tx.QueryRow("INSERT INTO images(bar_code, img_type, mime, local_filename, user_id) "+
+			"VALUES ($1, $2, $3, $4, $5) "+
 			"RETURNING id",
 			imgs[i].Barcode,
 			imgs[i].ImgType,
 			imgs[i].Mime,
 			imgs[i].LocalFilename,
+			imgs[i].UserID,
 		)
 
 		err = row.Scan(&imgs[i].ID)
@@ -261,6 +291,68 @@ func TestPgStore_getImage(t *testing.T) {
 	assert.Equal(t, imgs[3].ImgType, img.ImgType)
 	assert.Equal(t, imgs[3].Mime, img.Mime)
 	assert.Equal(t, imgs[3].LocalFilename, img.LocalFilename)
+	assert.Equal(t, imgs[3].UserID, img.UserID)
+	assert.Equal(t, imgs[3].AddedBy.Email, img.AddedBy.Email)
+	assert.Equal(t, imgs[3].AddedBy.Password, img.AddedBy.Password)
+
+	ok := reflect.DeepEqual(imgs[3].AddedBy.Privileges, img.AddedBy.Privileges)
+	assert.True(t, ok)
+}
+
+// createUsers creates two users, stores and returns them
+func createUsers(t *testing.T, srv *PgStore) (users []user.User) {
+	users = []user.User{
+		{
+			Email:    "foo@bar.com",
+			Password: "blahblahblah",
+			Privileges: map[string]bool{
+				user.PrivilegeAdmin:       false,
+				user.PrivilegeEditUsers:   false,
+				user.PrivilegeInviteUsers: false,
+			},
+		},
+		{
+			Email:    "foo2@bar2.com",
+			Password: "blahblahblah2",
+			Privileges: map[string]bool{
+				user.PrivilegeAdmin:       false,
+				user.PrivilegeEditUsers:   true,
+				user.PrivilegeInviteUsers: true,
+			},
+		},
+	}
+
+	tx, err := srv.connPool.Begin()
+	require.NoError(t, err)
+
+	row := tx.QueryRow("INSERT INTO "+
+		"users(email, password, privileges) "+
+		"VALUES ($1, $2, $3) "+
+		"RETURNING id",
+		users[0].Email,
+		users[0].Password,
+		users[0].Privileges,
+	)
+
+	err = row.Scan(&users[0].ID)
+	require.NoError(t, err)
+
+	row2 := tx.QueryRow("INSERT INTO "+
+		"users(email, password, privileges) "+
+		"VALUES ($1, $2, $3) "+
+		"RETURNING id",
+		users[1].Email,
+		users[1].Password,
+		users[1].Privileges,
+	)
+
+	err = row2.Scan(&users[1].ID)
+	require.NoError(t, err)
+
+	err = tx.Commit()
+	require.NoError(t, err)
+
+	return users
 }
 
 func preparePgStore(t *testing.T) *PgStore {

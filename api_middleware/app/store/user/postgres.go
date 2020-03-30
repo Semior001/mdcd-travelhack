@@ -45,7 +45,7 @@ func NewPgStore(connStr string) (*PgStore, error) {
 }
 
 // put saves user in postgres Store
-func (p *PgStore) put(user User) (int, error) {
+func (p *PgStore) put(user User) (uint64, error) {
 	tx, err := p.connPool.Begin()
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to start insert transaction into pg users store")
@@ -69,7 +69,7 @@ func (p *PgStore) put(user User) (int, error) {
 		time.Now(),
 	)
 
-	var id int
+	var id uint64
 	err = row.Scan(&id)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to scan user ID while inserting")
@@ -85,7 +85,7 @@ func (p *PgStore) put(user User) (int, error) {
 }
 
 // Get returns user by its ID, if user is present
-func (p *PgStore) Get(id int) (User, error) {
+func (p *PgStore) Get(id uint64) (User, error) {
 	user := User{ID: id}
 
 	row := p.connPool.QueryRow("SELECT email, password, privileges, created_at, updated_at "+
@@ -146,7 +146,7 @@ func (p *PgStore) GetByEmail(email string) (User, error) {
 
 // GetAuthData provides basic auth information about user, such as email, hashed password and
 // its privileges in format map[privilege]given
-func (p *PgStore) GetAuthData(id int) (string, string, map[string]bool, error) {
+func (p *PgStore) GetAuthData(id uint64) (string, string, map[string]bool, error) {
 	user := User{}
 
 	row := p.connPool.QueryRow("SELECT email, password, privileges "+
@@ -161,7 +161,7 @@ func (p *PgStore) GetAuthData(id int) (string, string, map[string]bool, error) {
 }
 
 // Delete deletes user, given by its ID, from the postgres database
-func (p *PgStore) Delete(id int) error {
+func (p *PgStore) Delete(id uint64) error {
 	commandTag, err := p.connPool.Exec("DELETE FROM users "+
 		"WHERE id = $1",
 		id)

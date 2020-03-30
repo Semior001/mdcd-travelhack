@@ -95,7 +95,7 @@ func (s *Service) Save(userID uint64, barcode string, imgType string, mime strin
 
 	defer func() {
 		if err = file.Close(); err != nil {
-			log.Printf("[DEBUG] failed to close image file")
+			log.Printf("[WARN] failed to close image file %s", fileName)
 		}
 	}()
 

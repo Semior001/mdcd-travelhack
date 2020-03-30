@@ -23,7 +23,7 @@ const (
 //
 // Note: if privilege is not present as key in the map, golang will return false in such case
 type User struct {
-	ID         int
+	ID         uint64
 	Email      string
 	Password   string          `json:"-"`
 	Privileges map[string]bool // in format "privilege: given"
@@ -33,13 +33,13 @@ type User struct {
 
 // Store defines an interface to put and load users from the database
 type Store interface {
-	put(user User) (id int, err error)
+	put(user User) (id uint64, err error)
 	Update(user User) (err error)
-	Get(id int) (user User, err error)
+	Get(id uint64) (user User, err error)
 	List() (users []User, err error)
 	GetByEmail(email string) (user User, err error)
-	GetAuthData(id int) (email string, pwdHash string, privs map[string]bool, err error)
-	Delete(id int) (err error)
+	GetAuthData(id uint64) (email string, pwdHash string, privs map[string]bool, err error)
+	Delete(id uint64) (err error)
 }
 
 // Service wraps Store interface providing methods that
@@ -96,7 +96,7 @@ func (s *Service) CheckUserCredentials(email string, password string) (bool, err
 }
 
 // HashPwdAndPut hashes user password before saving it to the database
-func (s *Service) HashPwdAndPut(user User) (int, error) {
+func (s *Service) HashPwdAndPut(user User) (uint64, error) {
 	// hashing password
 	bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), s.BCryptCost)
 	if err != nil {

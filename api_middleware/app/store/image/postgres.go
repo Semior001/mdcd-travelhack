@@ -1,6 +1,7 @@
 package image
 
 import (
+	"github.com/Semior001/mdcd-travelhack/app/store/user"
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
 	"log"
@@ -81,16 +82,26 @@ func (p *PgStore) putImage(image Image) (uint64, error) {
 // getImage returns image by its id
 func (p *PgStore) getImage(id uint64) (Image, error) {
 	image := Image{ID: id}
+	u := user.User{}
 
-	row := p.connPool.QueryRow("SELECT bar_code, mime, "+
-		"img_type, local_filename, user_id, created_at, updated_at "+
-		"FROM images WHERE id = $1", id)
+	row := p.connPool.QueryRow("SELECT i.bar_code, i.mime, "+
+		"i.img_type, i.local_filename, i.user_id, i.created_at, i.updated_at, "+
+		"u.email, u.password, u.privileges, u.created_at, u.updated_at "+
+		"FROM images AS i "+
+		"INNER JOIN users AS u "+
+		"ON i.user_id = u.id "+
+		"WHERE i.id = $1", id)
 
 	err := row.Scan(&image.Barcode, &image.Mime, &image.ImgType,
-		&image.LocalFilename, &image.UserID, &image.CreatedAt, &image.UpdatedAt)
+		&image.LocalFilename, &image.UserID, &image.CreatedAt, &image.UpdatedAt,
+		&u.Email, &u.Password, &u.Privileges, &u.CreatedAt, &u.UpdatedAt)
+
 	if err != nil {
-		return Image{}, errors.Wrapf(err, "failed to scan user with id = %d", id)
+		return Image{}, errors.Wrapf(err, "failed to scan image with id = %d", id)
 	}
+
+	u.ID = image.UserID
+	image.AddedBy = &u
 
 	return image, nil
 }
@@ -144,16 +155,26 @@ func (p *PgStore) CheckBarcode(barcode string) (bool, error) {
 // getImgByBarcode returns image by its barcode
 func (p *PgStore) getImgByBarcode(barcode string) (Image, error) {
 	image := Image{Barcode: barcode}
+	u := user.User{}
 
-	row := p.connPool.QueryRow("SELECT id, mime, img_type, "+
-		"local_filename, user_id, created_at, updated_at "+
-		"FROM images WHERE bar_code = $1", barcode)
+	row := p.connPool.QueryRow("SELECT i.id, i.mime, i.img_type, "+
+		"i.local_filename, i.user_id, i.created_at, i.updated_at, "+
+		"u.email, u.password, u.privileges, u.created_at, u.updated_at "+
+		"FROM images AS i "+
+		"INNER JOIN users AS u "+
+		"ON i.user_id = u.id "+
+		"WHERE i.bar_code = $1", barcode)
 
 	err := row.Scan(&image.ID, &image.Mime, &image.ImgType,
-		&image.LocalFilename, &image.UserID, &image.CreatedAt, &image.UpdatedAt)
+		&image.LocalFilename, &image.UserID, &image.CreatedAt, &image.UpdatedAt,
+		&u.Email, &u.Password, &u.Privileges, &u.CreatedAt, &u.UpdatedAt)
+
 	if err != nil {
-		return Image{}, errors.Wrapf(err, "failed to scan user with barcode = %s", barcode)
+		return Image{}, errors.Wrapf(err, "failed to scan image with barcode = %s", barcode)
 	}
+
+	u.ID = image.UserID
+	image.AddedBy = &u
 
 	return image, nil
 }
