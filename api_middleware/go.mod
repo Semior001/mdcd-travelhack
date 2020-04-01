@@ -11,6 +11,7 @@ require (
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/lib/pq v1.3.0 // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/segmentio/ksuid v1.0.2
 	github.com/shopspring/decimal v0.0.0-20200227202807-02e2044944cc // indirect
 	github.com/stretchr/testify v1.5.1
 	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6

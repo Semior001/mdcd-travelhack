@@ -3,8 +3,11 @@ package image
 import (
 	"github.com/Semior001/mdcd-travelhack/app/store/user"
 	"github.com/pkg/errors"
+	"github.com/segmentio/ksuid"
 	"io"
+	"log"
 	"os"
+	"path"
 	"strings"
 	"time"
 )
@@ -20,12 +23,12 @@ const (
 
 // Image describes a particular image added by any user
 type Image struct {
-	ID            int
+	ID            uint64
 	Barcode       string
 	ImgType       string
 	Mime          string // mime type of an image, e.g. "gif", "jpg", etc.
 	LocalFilename string
-	UserID        int
+	UserID        uint64
 	AddedBy       *user.User
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
@@ -33,9 +36,9 @@ type Image struct {
 
 // Store defines an interface to put and load images from the database
 type Store interface {
-	putImage(imgMetaData Image) (imgID int, err error)
-	getImage(id int) (imgMetaData Image, err error)
-	GetBackgroundIds() (ids []int, err error)
+	putImage(imgMetaData Image) (imgID uint64, err error)
+	getImage(id uint64) (imgMetaData Image, err error)
+	GetBackgroundIds() (ids []uint64, err error)
 	CheckBarcode(barcode string) (ok bool, err error)
 	getImgByBarcode(barcode string) (imgMetaData Image, err error)
 }
@@ -81,14 +84,65 @@ func NewService(opts ServiceOpts) (*Service, error) {
 
 // Save stores image in the local path, given to the Service
 // and stores all metadata in the database via calling Store.putImage
-func (s *Service) Save(userId uint64, barcode string, imgType string, reader io.Reader) (imgId uint64, err error) {
-	panic("implement me")
+func (s *Service) Save(userID uint64, barcode string, imgType string, mime string, reader io.Reader) (imgID uint64, err error) {
+	fileName := ksuid.New().String()
+	filePath := path.Join(s.LocalStoragePath, fileName)
+
+	file, err := os.Create(filePath)
+	if err != nil {
+		return 0, errors.Wrapf(err, "failed to create image file in %s", filePath)
+	}
+
+	defer func() {
+		if err = file.Close(); err != nil {
+			log.Printf("[WARN] failed to close image file %s", fileName)
+		}
+	}()
+
+	_, err = io.Copy(file, reader)
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to copy image to file")
+	}
+
+	imgID, err = s.putImage(Image{
+		Barcode:       barcode,
+		ImgType:       imgType,
+		Mime:          mime,
+		LocalFilename: fileName,
+		UserID:        userID,
+	})
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to put image in db")
+	}
+
+	return imgID, nil
 }
 
-func (s *Service) Load(imgId uint64) (Image, io.ReadCloser, error) {
-	panic("implement me")
+// Load returns image from local storage and its metadata from database by id
+func (s *Service) Load(imgID uint64) (Image, io.ReadCloser, error) {
+	imgMetaData, err := s.getImage(imgID)
+	if err != nil {
+		return Image{}, nil, errors.Wrap(err, "failed to find image metadata in db")
+	}
+
+	file, err := os.Open(path.Join(s.LocalStoragePath, imgMetaData.LocalFilename))
+	if err != nil {
+		return Image{}, nil, errors.Wrap(err, "failed to load image from storage")
+	}
+	return imgMetaData, file, nil
 }
 
+// GetImgByBarcode returns image from local storage and its metadata from database by barcode
 func (s *Service) GetImgByBarcode(barcode string) (Image, io.ReadCloser, error) {
-	panic("implement me")
+	imgMetaData, err := s.getImgByBarcode(barcode)
+	if err != nil {
+		return Image{}, nil, errors.Wrap(err, "failed to find image metadata in db")
+	}
+
+	file, err := os.Open(path.Join(s.LocalStoragePath, imgMetaData.LocalFilename))
+	if err != nil {
+		return Image{}, nil, errors.Wrap(err, "failed to load image from storage")
+	}
+
+	return imgMetaData, file, nil
 }

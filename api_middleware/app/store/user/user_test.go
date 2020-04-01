@@ -18,7 +18,7 @@ func TestService_HashPwdAndPut(t *testing.T) {
 			storedUsr = &user
 			return true
 		}),
-	).Return(1, nil)
+	).Return(uint64(1), nil)
 
 	srv := Service{
 		BCryptCost: 8,
@@ -30,7 +30,7 @@ func TestService_HashPwdAndPut(t *testing.T) {
 		Password: "qwerty12345",
 	})
 	require.NoError(t, err)
-	assert.Equal(t, 1, id)
+	assert.Equal(t, uint64(1), id)
 	err = bcrypt.CompareHashAndPassword([]byte(storedUsr.Password), []byte("qwerty12345"))
 	if err == bcrypt.ErrMismatchedHashAndPassword {
 		require.Fail(t, "hash does not match with pwd")

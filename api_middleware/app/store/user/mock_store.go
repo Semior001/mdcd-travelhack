@@ -10,11 +10,11 @@ type MockStore struct {
 }
 
 // Delete provides a mock function with given fields: id
-func (_m *MockStore) Delete(id int) error {
+func (_m *MockStore) Delete(id uint64) error {
 	ret := _m.Called(id)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(int) error); ok {
+	if rf, ok := ret.Get(0).(func(uint64) error); ok {
 		r0 = rf(id)
 	} else {
 		r0 = ret.Error(0)
@@ -24,18 +24,18 @@ func (_m *MockStore) Delete(id int) error {
 }
 
 // Get provides a mock function with given fields: id
-func (_m *MockStore) Get(id int) (User, error) {
+func (_m *MockStore) Get(id uint64) (User, error) {
 	ret := _m.Called(id)
 
 	var r0 User
-	if rf, ok := ret.Get(0).(func(int) User); ok {
+	if rf, ok := ret.Get(0).(func(uint64) User); ok {
 		r0 = rf(id)
 	} else {
 		r0 = ret.Get(0).(User)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
 		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
@@ -45,25 +45,25 @@ func (_m *MockStore) Get(id int) (User, error) {
 }
 
 // GetAuthData provides a mock function with given fields: id
-func (_m *MockStore) GetAuthData(id int) (string, string, map[string]bool, error) {
+func (_m *MockStore) GetAuthData(id uint64) (string, string, map[string]bool, error) {
 	ret := _m.Called(id)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(int) string); ok {
+	if rf, ok := ret.Get(0).(func(uint64) string); ok {
 		r0 = rf(id)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 string
-	if rf, ok := ret.Get(1).(func(int) string); ok {
+	if rf, ok := ret.Get(1).(func(uint64) string); ok {
 		r1 = rf(id)
 	} else {
 		r1 = ret.Get(1).(string)
 	}
 
 	var r2 map[string]bool
-	if rf, ok := ret.Get(2).(func(int) map[string]bool); ok {
+	if rf, ok := ret.Get(2).(func(uint64) map[string]bool); ok {
 		r2 = rf(id)
 	} else {
 		if ret.Get(2) != nil {
@@ -72,7 +72,7 @@ func (_m *MockStore) GetAuthData(id int) (string, string, map[string]bool, error
 	}
 
 	var r3 error
-	if rf, ok := ret.Get(3).(func(int) error); ok {
+	if rf, ok := ret.Get(3).(func(uint64) error); ok {
 		r3 = rf(id)
 	} else {
 		r3 = ret.Error(3)
@@ -140,14 +140,14 @@ func (_m *MockStore) Update(user User) error {
 }
 
 // put provides a mock function with given fields: user
-func (_m *MockStore) put(user User) (int, error) {
+func (_m *MockStore) put(user User) (uint64, error) {
 	ret := _m.Called(user)
 
-	var r0 int
-	if rf, ok := ret.Get(0).(func(User) int); ok {
+	var r0 uint64
+	if rf, ok := ret.Get(0).(func(User) uint64); ok {
 		r0 = rf(user)
 	} else {
-		r0 = ret.Get(0).(int)
+		r0 = ret.Get(0).(uint64)
 	}
 
 	var r1 error

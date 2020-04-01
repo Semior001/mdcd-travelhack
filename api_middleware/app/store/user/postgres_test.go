@@ -86,7 +86,7 @@ func TestPgStore_Delete(t *testing.T) {
 			privsMarshalled,
 		)
 
-		var id int
+		var id uint64
 		err = row.Scan(&id)
 		usrs[k].ID = id
 
@@ -102,7 +102,7 @@ func TestPgStore_Delete(t *testing.T) {
 
 	// checking
 	row := srv.connPool.QueryRow(`SELECT id, email, password, privileges FROM users WHERE id = $1`, usrs["foo3@bar.com"].ID)
-	var id int
+	var id uint64
 	var email string
 	var pwd string
 	var privsStr string
@@ -185,7 +185,7 @@ func TestPgStore_Get(t *testing.T) {
 			privsMarshalled,
 		)
 
-		var id int
+		var id uint64
 		err = row.Scan(&id)
 		usrs[k].ID = id
 
@@ -204,7 +204,7 @@ func TestPgStore_Get(t *testing.T) {
 	assert.Equal(t, shouldBe.Email, usr.Email)
 	assert.Equal(t, shouldBe.Password, usr.Password)
 
-	ok := reflect.DeepEqual(shouldBe.Privileges, usr.Password)
+	ok := reflect.DeepEqual(shouldBe.Privileges, usr.Privileges)
 	assert.True(t, ok)
 }
 
@@ -212,7 +212,7 @@ func TestPgStore_GetAuthData(t *testing.T) {
 	srv := preparePgStore(t)
 
 	// inserting users
-	usrs := map[string]*User{
+	users := map[string]*User{
 		"foo@bar.com": {
 			Email:    "foo@bar.com",
 			Password: "blahblahblah",
@@ -268,8 +268,8 @@ func TestPgStore_GetAuthData(t *testing.T) {
 			},
 		},
 	}
-	for k := range usrs {
-		privsMarshalled, err := json.Marshal(usrs[k].Privileges)
+	for k := range users {
+		privsMarshalled, err := json.Marshal(users[k].Privileges)
 
 		tx, err := srv.connPool.Begin()
 		require.NoError(t, err)
@@ -278,14 +278,14 @@ func TestPgStore_GetAuthData(t *testing.T) {
 			"users(email, password, privileges) "+
 			"VALUES ($1, $2, $3) "+
 			"RETURNING id",
-			usrs[k].Email,
-			usrs[k].Password,
+			users[k].Email,
+			users[k].Password,
 			privsMarshalled,
 		)
 
-		var id int
+		var id uint64
 		err = row.Scan(&id)
-		usrs[k].ID = id
+		users[k].ID = id
 
 		require.NoError(t, err)
 
@@ -294,11 +294,11 @@ func TestPgStore_GetAuthData(t *testing.T) {
 	}
 
 	// querying
-	email, pwd, privs, err := srv.GetAuthData(usrs["foo3@bar.com"].ID)
+	email, pwd, privs, err := srv.GetAuthData(users["foo3@bar.com"].ID)
 	require.NoError(t, err)
 
 	// checking
-	shouldBe := usrs["foo3@bar.com"]
+	shouldBe := users["foo3@bar.com"]
 	assert.Equal(t, shouldBe.Email, email)
 	assert.Equal(t, shouldBe.Password, pwd)
 
@@ -310,7 +310,7 @@ func TestPgStore_GetByEmail(t *testing.T) {
 	srv := preparePgStore(t)
 
 	// inserting users
-	usrs := map[string]*User{
+	users := map[string]*User{
 		"foo@bar.com": {
 			Email:    "foo@bar.com",
 			Password: "blahblahblah",
@@ -366,8 +366,8 @@ func TestPgStore_GetByEmail(t *testing.T) {
 			},
 		},
 	}
-	for k := range usrs {
-		privsMarshalled, err := json.Marshal(usrs[k].Privileges)
+	for k := range users {
+		privsMarshalled, err := json.Marshal(users[k].Privileges)
 
 		tx, err := srv.connPool.Begin()
 		require.NoError(t, err)
@@ -376,14 +376,14 @@ func TestPgStore_GetByEmail(t *testing.T) {
 			"users(email, password, privileges) "+
 			"VALUES ($1, $2, $3) "+
 			"RETURNING id",
-			usrs[k].Email,
-			usrs[k].Password,
+			users[k].Email,
+			users[k].Password,
 			privsMarshalled,
 		)
 
-		var id int
+		var id uint64
 		err = row.Scan(&id)
-		usrs[k].ID = id
+		users[k].ID = id
 
 		require.NoError(t, err)
 
@@ -396,7 +396,7 @@ func TestPgStore_GetByEmail(t *testing.T) {
 	require.NoError(t, err)
 
 	// checking
-	shouldBe := usrs["foo2@bar.com"]
+	shouldBe := users["foo2@bar.com"]
 	assert.Equal(t, usr.ID, shouldBe.ID)
 	assert.Equal(t, usr.Email, shouldBe.Email)
 	assert.Equal(t, usr.Password, shouldBe.Password)
@@ -480,7 +480,7 @@ func TestPgStore_List(t *testing.T) {
 			privsMarshalled,
 		)
 
-		var id int
+		var id uint64
 		err = row.Scan(&id)
 		usrs[k].ID = id
 
@@ -521,6 +521,7 @@ func TestPgStore_Update(t *testing.T) {
 	}
 
 	privsMarshalled, err := json.Marshal(user.Privileges)
+	require.NoError(t, err)
 
 	tx, err := srv.connPool.Begin()
 	require.NoError(t, err)
@@ -536,9 +537,10 @@ func TestPgStore_Update(t *testing.T) {
 		time.Now(),
 	)
 
-	var id int
+	var id uint64
 	err = row.Scan(&id)
 	require.NoError(t, err)
+	user.ID = id
 
 	err = tx.Commit()
 	require.NoError(t, err)
@@ -550,7 +552,7 @@ func TestPgStore_Update(t *testing.T) {
 	require.NoError(t, err)
 
 	// load from db
-	var uId int
+	var uId uint64
 	var uEmail, uPwd string
 	var uPrivsMarshalled string
 	row = srv.connPool.QueryRow(`SELECT id, email, password, privileges FROM users`)
@@ -562,7 +564,7 @@ func TestPgStore_Update(t *testing.T) {
 	err = json.Unmarshal([]byte(uPrivsMarshalled), &uPrivs)
 	require.NoError(t, err)
 
-	assert.Equal(t, 1, uId)
+	assert.Equal(t, uint64(1), uId)
 	assert.Equal(t, "foo@bar.com", uEmail)
 	assert.Equal(t, "$2y$08$bEpqwi8ylxW9a1i8iQwV2OFs8tGKUjajbFRAGOSnsnWhubnjpcOzW", uPwd)
 
@@ -589,10 +591,10 @@ func TestPgStore_put(t *testing.T) {
 	})
 
 	require.NoError(t, err)
-	assert.Equal(t, 1, id)
+	assert.Equal(t, uint64(1), id)
 
 	// load from db
-	var uId int
+	var uId uint64
 	var uEmail, uPwd string
 	var uPrivsMarshalled string
 	row := srv.connPool.QueryRow(`SELECT id, email, password, privileges FROM users`)
@@ -604,7 +606,7 @@ func TestPgStore_put(t *testing.T) {
 	err = json.Unmarshal([]byte(uPrivsMarshalled), &uPrivs)
 	require.NoError(t, err)
 
-	assert.Equal(t, 1, uId)
+	assert.Equal(t, uint64(1), uId)
 	assert.Equal(t, "foo@bar.com", uEmail)
 	assert.Equal(t, "$2y$08$bEpqwi8ylxW9a1i8iQwV2OFs8tGKUjajbFRAGOSnsnWhubnjpcOzW", uPwd)
 
@@ -624,9 +626,9 @@ func preparePgStore(t *testing.T) *PgStore {
 
 	connPool, err := pgx.NewConnPool(pgx.ConnPoolConfig{
 		ConnConfig:     connConf,
-		MaxConnections: 1,
+		MaxConnections: 2,
 		AfterConnect:   nil,
-		AcquireTimeout: 60,
+		AcquireTimeout: 60 * time.Millisecond,
 	})
 	require.NoError(t, err)
 
