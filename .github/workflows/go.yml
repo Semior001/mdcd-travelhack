@@ -36,10 +36,15 @@ jobs:
         run: PGPASSWORD=postgres psql -h postgres -p 5432 -U postgres -d test -a -f $GITHUB_WORKSPACE/api_middleware/scripts/migrate.sql
         working-directory: api_middleware
 
-      - name: Install go
+      - name: Install go 1.14
         uses: actions/setup-go@v1
         with:
           go-version: 1.14
+
+      - name: Install go 1.13
+          uses: actions/setup-go@v1
+          with:
+            go-version: 1.13
 
       - name: Test api_middleware and extract coverage
         run: |
